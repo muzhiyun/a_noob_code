@@ -1,6 +1,6 @@
 #第二封python代码
-#为了爬垃圾图书馆的借阅系统写的半成品   垃圾代码  又臭又长
-#死于中文乱码 不接受吐槽 over
+#为了爬垃圾图书馆的借阅系统写的半成品  
+#死于中文乱码 
 #2017-03-25    整理时间 2018-06-19
 
 
@@ -17,7 +17,7 @@ ma=1
 while num<500006:
     num= "%07d" % num
     num=str(num)
-    url = "http://202.200.87.00/wx_OilUniversity_rtm/index.php/index/Search/bookContent/recCtrlId/01h"+num  #我会告诉你真实IP吗 笑话
+    url = "http://202.200.87.00/wx_OilUniversity_rtm/index.php/index/Search/bookContent/recCtrlId/01h"+num  
     request=urllib2.Request(url)
     res=urllib2.urlopen(request)
     test=res.read()
