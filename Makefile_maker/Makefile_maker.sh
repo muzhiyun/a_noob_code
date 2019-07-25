@@ -9,8 +9,8 @@ fi
 :>Makefile
 echo 'cc = gcc' >> Makefile
 echo 'prom = '$1 >> Makefile
-echo 'deps = $(shell find ./ -name '"'"'*.h'"'"'|sed '"'"'s%.*/%%'"'"')' >> Makefile
-echo 'src = $(shell find ./ -name '"'"'*.c'"'"'|sed '"'"'s%.*/%%'"'"')' >> Makefile
+echo 'deps = $(shell find ./ -maxdepth 1 -name '"'"'*.h'"'"'|sed '"'"'s%.*/%%'"'"')' >> Makefile
+echo 'src = $(shell find ./ -maxdepth 1 -name '"'"'*.c'"'"'|sed '"'"'s%.*/%%'"'"')' >> Makefile
 echo 'obj = $(src:%.c=%.o)' >> Makefile
 echo '' >> Makefile
 echo '$(prom):$(obj)' >> Makefile
