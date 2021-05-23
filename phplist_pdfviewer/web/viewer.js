@@ -3922,7 +3922,9 @@ var PDFSidebar = function () {
         return;
       }
       var isViewPreserved = view === this.visibleView;
-      this.switchView(view, true);
+      //停用部分pdf上会触发的自动打开侧边菜单
+      //this.switchView(view, true);  
+      this.switchView(view);
       if (isViewPreserved) {
         this._dispatchEvent();
       }
