@@ -15,7 +15,7 @@ class config {
   public static $default = array(
 
     // paths
-    'root' => '', // root path relative to script. 
+    'root' => '/app/file/', // root path relative to script. 
     'start_path' => false, // start path relative to script. If empty, root is start path
 
     // login
@@ -1358,7 +1358,7 @@ header('files-msg: [' . header_memory_time() . ']');
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="noindex,nofollow">
-    <title><?php echo $init_path ? basename($init_path) : '/'; ?></title>
+    <title>文档下载站</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css">
     <link href="<?php echo config::$assets ?>css/files.css" rel="stylesheet">
     <?php custom_script('css'); ?>
@@ -1429,7 +1429,8 @@ var CodeMirror = {};
     <!-- custom -->
     <?php custom_script('js'); ?>
     <!-- files -->
-    <script src="<?php echo config::$assets ?>js/files.js"></script>
+    <!-- <script src="<?php echo config::$assets ?>js/files.js"></script> -->
+    <script src="files.js"></script>
 
   </body>
 </html>

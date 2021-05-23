@@ -2258,6 +2258,13 @@
 			t && e.classList.toggle(t), i && e.classList.toggle(i), !0 !== n && !1 !== n || (e.disabled = n), a && (e.dataset.tooltip_original || (e.dataset.tooltip_original = e.dataset.tooltip), e.dataset.tooltip = a == e.dataset.tooltip ? e.dataset.tooltip_original : a)
 		}
 
+		function find(str,cha,num){
+			var x=str.indexOf(cha);
+			for(var i=0;i<num;i++){
+				x=str.indexOf(cha,x+1);
+			}
+			return x;
+		}
 		function O(e, t, i, a, n, o) {
 			A(e, t, i, a, n), setTimeout((function() {
 				A(e, t, i, a, !n && null), e.classList.remove("show-tooltip")
@@ -2284,8 +2291,23 @@
 					}
 				}(o), N.modal.code && (N.modal.type = "code", o.filesize > 1e3 && (f = !0), E.load_plugin("codemirror"), s = '<div class="spinner-border modal-preview-spinner"></div>' + E.get_file_icon(o, "modal-file-icon")));
 			s || (s = E.get_file_icon(o, "modal-file-icon"));
-			var h, _, w, y, L, A, S = ["image", "file"].includes(N.modal.type) || "dir" === N.modal.type && o.url_path ? "a" : "div",
-				O = "<" + ("a" === S ? 'a href="' + n(o) + '" target="_blank" title="' + G("image" === N.modal.type ? "zoom" : "open in new tab") + '"' : "div") + ' class="modal-preview modal-preview-' + N.modal.type + '">' + s + "</" + S + '><div class="modal-info">' + d(!0, "modal-info-context") + g(i(o.basename), "div", "modal-info-name") + '<div class="modal-info-meta">' + (o.mime ? g(E.get_svg_file_icon(o) + o.mime, "div", "modal-info-mime") : "") + c(o.image, "div", "modal-info-dimensions") + r(o, "div", "modal-info-filesize") + (_ = "div", w = "modal-info-permissions", y = (h = o).is_readable && h.is_writeable, L = G("文件权限") + ": " + h.fileperms, A = g(E.get_svg(y ? "lock_open_outline" : "lock_outline") + h.fileperms, "span", y ? "is-readwrite" : "not-readwrite", L), g(A, _, w) + "</div>") + g(E.get_svg("date") + E.get_time(o, "llll", !1, !0), "div", "modal-info-date") + v(o.image, "div", "modal-info-exif", !0) + m(o.image, "modal-info", !0) + "</div>";
+			;
+		
+		//获取url并截取用于拼接herf
+		var url = window.location.href;
+		index= find(url,"/",2);
+		var urlhost = url.substr(0,index);
+		
+		//获取文件后缀名并判断是否为pdf
+		var index= n(o).lastIndexOf(".");
+		var ext = n(o).substr(index+1);
+		if (ext=="pdf") 
+		var href = "a href="+urlhost+"/web/viewer.html?file="+urlhost+"/";
+		else
+		var href = "a href=";
+		
+			var h, _, w, y, L, A, S = ["image", "file"].includes(N.modal.type) || "dir" === N.modal.type && o.url_path ? "a" : "div",			
+		O = "<" + ("a" === S ? href + n(o) + ' target="_blank" title="' + G("image" === N.modal.type ? "zoom" : "open in new tab") + '"' : "div") + ' class="modal-preview modal-preview-' + N.modal.type + '">' + s + "</" + S + '><div class="modal-info">' + d(!0, "modal-info-context") + g(i(o.basename), "div", "modal-info-name") + '<div class="modal-info-meta">' + (o.mime ? g(E.get_svg_file_icon(o) + o.mime, "div", "modal-info-mime") : "") + c(o.image, "div", "modal-info-dimensions") + r(o, "div", "modal-info-filesize") + (_ = "div", w = "modal-info-permissions", y = (h = o).is_readable && h.is_writeable, L = G("文件权限") + ": " + h.fileperms, A = g(E.get_svg(y ? "lock_open_outline" : "lock_outline") + h.fileperms, "span", y ? "is-readwrite" : "not-readwrite", L), g(A, _, w) + "</div>") + g(E.get_svg("date") + E.get_time(o, "llll", !1, !0), "div", "modal-info-date") + v(o.image, "div", "modal-info-exif", !0) + m(o.image, "modal-info", !0) + "</div>";
 			a.classList.toggle("modal-lg", f), u.classList.add("modal-content-" + N.modal.type), b.innerText = o.basename, V.innerHTML = O, _c.history && (l && history.pushState(null, o.basename, "#" + encodeURIComponent(o.basename)), N.modal.popstate = H(window, "popstate", C)),
 				function(e) {
 					N.modal.open = Math.random(), T("esc", C, "keyup");
