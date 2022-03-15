@@ -1,0 +1,182 @@
+esphome:
+  name: esphome
+  platform: ESP8266
+  board: nodemcuv2
+
+web_server:
+  port: 80
+
+wifi:
+  ssid: "Danke61983"
+  password: "wifi.danke.life"
+  #ssid: "OpenWrt_2.4"
+  #password: "Qq2017.."
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Muzhi Fallback Hotspot"
+    password: "Qq2017.."
+
+#captive_portal:
+#强制门户认证
+
+# Enable logging
+logger:
+  level: DEBUG
+  # logs:
+  #   mqtt.component: INFO
+  #   mqtt.client: INFO
+
+# Enable Home Assistant API
+api:
+  password: "Qq2017.."
+#   services:
+#     - service: echo_g_u8_air_conditioning
+#       #variables:
+#       #  my_variable: |-
+#       #    return id(g_u8_air_conditioning).state;
+#       variables:
+#         my_brightness: int
+#       #   my_effect: string
+#       #data_template:
+#       #  message: The humidity is {{ my_variable }}%.
+      
+#       then:
+#         brightness: !lambda 'return id(g_u8_air_conditioning).state;'
+      #   - light.turn_on:
+      #       id: my_light
+      #       brightness: !lambda 'return my_brightness;'
+      #       effect: !lambda 'return my_effect;'
+
+ota:
+  password: "Qq2017.."
+
+globals:
+  - id: g_u8_air_conditioning
+    type: int
+    restore_value: yes
+    initial_value: '0'
+  
+remote_receiver:
+  pin: 
+    number: D1
+    inverted: True
+  dump: all
+    #dump: raw
+
+remote_transmitter:
+  pin: 
+    number:  D5
+    inverted: True
+    #supports_cool: True
+  carrier_duty_percent: 50%
+
+sensor:
+  - platform: dht
+    pin: D7
+    temperature:
+      name: "Living Room Temperature"
+    humidity:
+      name: "Living Room Humidity"
+    update_interval: 60s
+    model: DHT11
+
+# time:
+#   - platform: sntp
+#     timezone: Asia/Hong_Kong
+#     servers: ntp1.aliyun.com
+#     id: sntp_time
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    timezone: Asia/Hong_Kong
+#     on_time:
+#       - seconds: 0
+#         minutes: 20
+#         hours: 20
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_open_20
+          
+#       - seconds: 0
+#         minutes: 20
+#         hours: 8
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_off
+          
+#       - seconds: 0
+#         minutes: 30
+#         hours: 21
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_open_25
+
+text_sensor:
+  - platform: template
+    name: "Current time"
+    lambda: |-
+      char str[17];
+      time_t currTime = id(homeassistant_time).now().time;
+      strftime(str, sizeof(str), "%Y-%m-%d %H:%M", localtime(&currTime));
+      return { str };
+    update_interval: 60s
+
+switch:
+  - platform: template
+    name: my_switch_off
+    id: my_switch_off
+    turn_on_action:
+      - remote_transmitter.transmit_raw:
+          carrier_frequency: 38kHz
+          code: [4494, -4441, 604, -1625, 606, -534, 602, -1627, 604, -1626, 604, -536, 601, -533, 604, -1625, 606, -532, 604, -531, 604, -1625, 659, -480, 601, -533, 
+                604, -1627, 603, -1627, 604, -533, 602, -1628, 605, -532, 605, -1624, 606, -1624, 602, -1631, 599, -1629, 601, -535, 602, -1629, 601, -1628, 602, -1628, 
+                603, -533, 604, -534, 601, -537, 600, -535, 602, -1629, 602, -535, 602, -536, 602, -1628, 606, -1624, 604, -1626, 603, -534, 604, -533, 602, -539, 599, 
+                -535, 602, -536, 602, -534, 603, -535, 604, -533, 603, -1627, 605, -1625, 604, -1627, 606, -1624, 605, -1626, 605, -5273, 4473, -4441, 606, -1625, 605, 
+                -533, 603, -1626, 605, -1627, 600, -534, 604, -534, 604, -1626, 604, -534, 604, -533, 604, -1627, 607, -530, 603, -534, 604, -1626, 609, -1622, 604, -533, 
+                605, -1606, 623, -534, 603, -1627, 605, -1625, 605, -1625, 604, -1627, 604, -534, 607, -1624, 605, -1623, 606, -1625, 605, -537, 599, -536, 601, -531, 
+                604, -533, 603, -1630, 605, -532, 606, -515, 620, -1624, 605, -1625, 606, -1626, 604, -533, 603, -534, 604, -534, 603, -534, 604, -533, 605, -533, 
+                603, -534, 604, -533, 603, -1627, 604, -1626, 605, -1626, 605, -1628, 602, -1625, 605]
+      - globals.set:
+          id: g_u8_air_conditioning
+          value: '0'
+      - logger.log: "Switch Turned On!"
+      
+          
+  - platform: template
+    name: my_switch_open_20
+    id: my_switch_open_20
+    turn_on_action:
+      - remote_transmitter.transmit_raw:
+          carrier_frequency: 38kHz
+          code: [4458, -4498, 549, -1680, 549, -587, 550, -1679, 548, -1682, 549, -588, 548, -589, 549, -1681, 548, -590, 548, -588, 549, -1681, 549, -589, 548, -588, 
+                548, -1681, 549, -1685, 545, -588, 549, -1681, 549, -1681, 552, -584, 549, -1682, 548, -1681, 549, -1680, 549, -1680, 553, -1677, 548, -1682, 548, -589, 
+                547, -1681, 548, -589, 548, -589, 548, -588, 549, -590, 546, -589, 548, -589, 551, -584, 548, -589, 548, -1683, 548, -589, 548, -589, 548, -588, 549, 
+                -589, 548, -589, 549, -1681, 549, -1682, 549, -588, 549, -1682, 548, -1683, 548, -1682, 549, -1682, 548, -1683, 548, -5330, 4416, -4498, 548, -1682, 549, 
+                -589, 548, -1682, 548, -1682, 548, -589, 549, -589, 549, -1682, 548, -590, 547, -589, 549, -1682, 548, -588, 549, -589, 551, -1637, 591, -1682, 549, -588, 
+                549, -1681, 549, -1682, 548, -588, 550, -1680, 552, -1678, 548, -1683, 548, -1683, 548, -1682, 548, -1683, 548, -589, 548, -1683, 548, -589, 549, -588, 549, 
+                -593, 543, -589, 548, -588, 549, -588, 549, -588, 549, -588, 549, -1682,  548, -589, 548, -589, 548, -590, 548, -589, 548, -589, 548, -1683, 548, -1682, 548,
+                -588, 549, -1683, 548, -1682, 548, -1683, 549, -1681, 549, -1682, 548]
+      - globals.set:
+          id: g_u8_air_conditioning
+          value: '0'
+          
+          
+  - platform: template
+    name: my_switch_open_25
+    id: my_switch_open_25
+    turn_on_action:
+      - remote_transmitter.transmit_raw:
+          carrier_frequency: 38kHz
+          code: [4416, -4460, 584, -1694, 539, -628, 514, -1693, 540, -1694, 542, -595, 541, -626, 509, -1694, 539, -599, 539, -603, 536, -1693, 540, -598, 540, -601, 539, 
+              -1695, 540, -1693, 540, -582, 558, -1696, 539, -1694, 544, -600, 538, -1696, 538, -1694, 543, -1693, 543, -1691, 539, -1692, 540, -1699, 535, -602, 540, -1695, 
+              539, -628, 513, -602, 540, -602, 539, -602, 539, -601, 540, -628, 513, -1695, 540, -1695, 539, -600, 540, -627, 514, -601, 539, -626, 514, -602, 539, -627, 514, 
+              -627, 517, -599, 539, -1721, 513, -1696, 537, -1697, 539, -1722, 513, -1721, 513, -1696, 540, -5343, 4414, -4502, 541, -1696, 538, -604, 538, -1720, 514, -1696,
+              539, -602, 539, -629, 512, -1696, 539, -628, 513, -627, 513, -1692, 540, -624, 514, -599, 540, -1691, 540, -1693, 540, -624, 515, -1718, 515, -1698, 538, -629, 
+              513, -1721, 514, -1694, 539, -1722, 515, -1720, 513, -1696, 538, -1696, 539, -627, 513, -1693, 540, -626, 512, -625, 514, -624, 514, -600, 540, -625, 514, -602, 
+              536, -1694, 539, -1695, 537, -627, 514, -628, 513, -609, 540, -631, 510, -627, 514, -628, 513, -601, 540, -585, 558, -1693, 539, -1694, 541, -1694, 540, -1695, 
+              541, -1721, 514, -1694, 541]
+      - globals.set:
+          id: g_u8_air_conditioning
+          value: '0'
