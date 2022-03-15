@@ -1,24 +1,28 @@
 esphome:
   name: esphome
-  platform: ESP8266
+
+esp8266:
   board: nodemcuv2
+
+captive_portal:
 
 web_server:
   port: 80
 
 wifi:
-  ssid: "Danke61983"
-  password: "wifi.danke.life"
-  #ssid: "OpenWrt_2.4"
-  #password: "Qq2017.."
+  reboot_timeout: 0s
+  #fast_connect: true
+  networks:
+  - ssid: "H3C_70FB73"
+    password: "11111111"
+  - ssid: "Danke61983"
+    password: "wifi.danke.life"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Muzhi Fallback Hotspot"
     password: "Qq2017.."
 
-#captive_portal:
-#强制门户认证
 
 # Enable logging
 logger:
@@ -58,6 +62,7 @@ globals:
     initial_value: '0'
   
 remote_receiver:
+  id: rcvr
   pin: 
     number: D1
     inverted: True
@@ -67,7 +72,7 @@ remote_receiver:
 remote_transmitter:
   pin: 
     number:  D5
-    inverted: True
+    #inverted: True  #禁止设置 当前硬件平台会冒烟烧元件
     #supports_cool: True
   carrier_duty_percent: 50%
 
@@ -75,15 +80,17 @@ sensor:
   - platform: dht
     pin: D7
     temperature:
+      id: dht11_temp
       name: "Living Room Temperature"
     humidity:
+      id: dht11_humi
       name: "Living Room Humidity"
     update_interval: 60s
     model: DHT11
 
 # time:
 #   - platform: sntp
-#     timezone: Asia/Hong_Kong
+#     timezone: UTC8 #Asia/Hong_Kong
 #     servers: ntp1.aliyun.com
 #     id: sntp_time
 
@@ -114,34 +121,65 @@ time:
 #         #  - switch.toggle: my_switch_open_25
 
 text_sensor:
+  
+  - platform: version
+    name: "ESPHome Version"
+    
+  # - platform: wifi_info
+  #   ip_address:
+  #     name: ESP IP Address
+  #   ssid:
+  #     name: ESP Connected SSID
+  #   bssid:
+  #     name: ESP Connected BSSID
+  #   mac_address:
+  #     name: ESP Mac Wifi Address
+  #   scan_results:
+  #     name: ESP Latest Scan Results
   - platform: template
     name: "Current time"
     lambda: |-
       char str[17];
-      time_t currTime = id(homeassistant_time).now().time;
-      strftime(str, sizeof(str), "%Y-%m-%d %H:%M", localtime(&currTime));
+      auto currTime = id(homeassistant_time).now();
+      currTime.strftime(str, sizeof(str), "%Y-%m-%d %H:%M");
       return { str };
     update_interval: 60s
+
+  # - platform: template
+  #   name: "Current time"
+  #   lambda: |-
+  #     char str[17];
+  #     time_t currTime = id(homeassistant_time).now().time;
+  #     strftime(str, sizeof(str), "%Y-%m-%d %H:%M", localtime(&currTime));
+  #     return { str };
+  #   update_interval: 60s
 
 switch:
   - platform: template
     name: my_switch_off
     id: my_switch_off
     turn_on_action:
-      - remote_transmitter.transmit_raw:
-          carrier_frequency: 38kHz
-          code: [4494, -4441, 604, -1625, 606, -534, 602, -1627, 604, -1626, 604, -536, 601, -533, 604, -1625, 606, -532, 604, -531, 604, -1625, 659, -480, 601, -533, 
-                604, -1627, 603, -1627, 604, -533, 602, -1628, 605, -532, 605, -1624, 606, -1624, 602, -1631, 599, -1629, 601, -535, 602, -1629, 601, -1628, 602, -1628, 
-                603, -533, 604, -534, 601, -537, 600, -535, 602, -1629, 602, -535, 602, -536, 602, -1628, 606, -1624, 604, -1626, 603, -534, 604, -533, 602, -539, 599, 
-                -535, 602, -536, 602, -534, 603, -535, 604, -533, 603, -1627, 605, -1625, 604, -1627, 606, -1624, 605, -1626, 605, -5273, 4473, -4441, 606, -1625, 605, 
-                -533, 603, -1626, 605, -1627, 600, -534, 604, -534, 604, -1626, 604, -534, 604, -533, 604, -1627, 607, -530, 603, -534, 604, -1626, 609, -1622, 604, -533, 
-                605, -1606, 623, -534, 603, -1627, 605, -1625, 605, -1625, 604, -1627, 604, -534, 607, -1624, 605, -1623, 606, -1625, 605, -537, 599, -536, 601, -531, 
-                604, -533, 603, -1630, 605, -532, 606, -515, 620, -1624, 605, -1625, 606, -1626, 604, -533, 603, -534, 604, -534, 603, -534, 604, -533, 605, -533, 
-                603, -534, 604, -533, 603, -1627, 604, -1626, 605, -1626, 605, -1628, 602, -1625, 605]
-      - globals.set:
-          id: g_u8_air_conditioning
-          value: '0'
-      - logger.log: "Switch Turned On!"
+      - remote_transmitter.transmit_toshiba_ac:
+          rc_code_1: 0xB24D7B84E01F
+
+  #- platform: template
+  #  name: my_switch_off
+  #  id: my_switch_off
+  #  turn_on_action:
+  #    - remote_transmitter.transmit_raw:
+  #        carrier_frequency: 38kHz
+  #        code: [4494, -4441, 604, -1625, 606, -534, 602, -1627, 604, -1626, 604, -536, 601, -533, 604, -1625, 606, -532, 604, -531, 604, -1625, 659, -480, 601, -533, 
+  #              604, -1627, 603, -1627, 604, -533, 602, -1628, 605, -532, 605, -1624, 606, -1624, 602, -1631, 599, -1629, 601, -535, 602, -1629, 601, -1628, 602, -1628, 
+  #              603, -533, 604, -534, 601, -537, 600, -535, 602, -1629, 602, -535, 602, -536, 602, -1628, 606, -1624, 604, -1626, 603, -534, 604, -533, 602, -539, 599, 
+  #              -535, 602, -536, 602, -534, 603, -535, 604, -533, 603, -1627, 605, -1625, 604, -1627, 606, -1624, 605, -1626, 605, -5273, 4473, -4441, 606, -1625, 605, 
+  #              -533, 603, -1626, 605, -1627, 600, -534, 604, -534, 604, -1626, 604, -534, 604, -533, 604, -1627, 607, -530, 603, -534, 604, -1626, 609, -1622, 604, -533, 
+  #              605, -1606, 623, -534, 603, -1627, 605, -1625, 605, -1625, 604, -1627, 604, -534, 607, -1624, 605, -1623, 606, -1625, 605, -537, 599, -536, 601, -531, 
+  #              604, -533, 603, -1630, 605, -532, 606, -515, 620, -1624, 605, -1625, 606, -1626, 604, -533, 603, -534, 604, -534, 603, -534, 604, -533, 605, -533, 
+  #              603, -534, 604, -533, 603, -1627, 604, -1626, 605, -1626, 605, -1628, 602, -1625, 605]
+  #    - globals.set:
+  #        id: g_u8_air_conditioning
+  #        value: '0'
+  #    - logger.log: "Switch Turned On!"
       
           
   - platform: template
@@ -180,3 +218,12 @@ switch:
       - globals.set:
           id: g_u8_air_conditioning
           value: '0'
+          
+
+          
+climate:
+- platform: coolix
+  name: "AC"
+  receiver_id: rcvr
+  sensor: dht11_temp
+
