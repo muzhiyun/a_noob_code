@@ -1,0 +1,89 @@
+esphome:
+  name: relay
+  platform: ESP8266
+  board: esp01_1m
+
+web_server:
+  port: 80
+
+wifi:
+  ssid: "Danke61983"
+  password: "wifi.danke.life"
+  #ssid: "OpenWrt_2.4"
+  #password: "Qq2017.."
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Muzhi Fallback Hotspot"
+    password: "Qq2017.."
+
+captive_portal:
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+  password: "Qq2017.."
+
+ota:
+  password: "Qq2017.."
+
+light:
+  - platform: binary
+    name: "Desk Lamp O2"
+    restore_mode: ALWAYS_OFF
+    output: light_output_2
+  - platform: binary
+    name: "Desk Lamp O0"
+    restore_mode: ALWAYS_OFF
+    output: light_output_0
+  - platform: binary
+    name: "Desk Lamp O5"
+    output: light_output_5
+  - platform: binary
+    name: "Desk Lamp O10"
+    id: desk_lamp_o10
+#    restore_mode: ALWAYS_ON
+    restore_mode: RESTORE_DEFAULT_ON
+    output: light_output_10
+
+
+# switch:
+#   - platform: gpio
+#     pin: GPIO10
+#     restore_mode: ALWAYS_ON
+#     name: "room_Light"
+
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    timezone: Asia/Hong_Kong
+    on_time:
+      - seconds: 0
+        minutes: 10                                              
+        hours: 4
+        days_of_week: MON-FRI
+        then:
+          - light.turn_off: 
+              id: desk_lamp_o10
+
+
+output:
+  - id: light_output_2
+    platform: gpio
+    inverted: True
+    pin: GPIO2
+  - id: light_output_0
+    platform: gpio
+    inverted: True
+    pin: GPIO0
+  - id: light_output_5
+    platform: gpio
+    pin: GPIO5
+  - id: light_output_10
+    platform: gpio
+    #inverted: True
+    pin: GPIO10
