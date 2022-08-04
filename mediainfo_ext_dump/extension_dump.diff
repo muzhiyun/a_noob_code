@@ -33,9 +33,9 @@ index 4f418b6..d8c86df 100644
 +        {
 +            if(ii%16==0)
 +            {
-+                printf("\n0x%02x   : ",(ii/16)*16);
++                printf("\n0x%02x   : ",ii);
 +            }
-+            printf("0x%02x ",*((unsigned char *)(Buffer+Buffer_Offset+(size_t)Element_Offsetii)));
++            printf("0x%02x ",*((unsigned char *)(Buffer+Buffer_Offset+(size_t)Element_Offset+ii)));
 +        }
 +        //printf("*\nBuffer=0x%llx\n",*((char *)Buffer));
 +        printf("\n");
