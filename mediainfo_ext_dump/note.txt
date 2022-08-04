@@ -8,6 +8,12 @@ BS_Begin dump extension Buffer:
 Name=matrix_coefficients Info=0x8 Bits=8 Offset_Get=0x1c Remain()=0x51 
 BS_Begin Buffer=0x7fffe959fbc3 Buffer_Offset=0x4c Element_Offset=0x4 BS_Size=0x55 
 
+
+
+
+
+Dec     Hex         Bin             enum
+------------------------------------------
 01              0000 0001 
 02      02      0000 0010       1
 03              0000 0011 
@@ -37,3 +43,14 @@ case  0 : return "Identity";                                    //Added in AVC
         case 13 : return "Chromaticity-derived constant";               //Added in HEVC 2016
         case 14 : return "ICtCp";                                       //Added in HEVC 2016
         default : return "";
+
+
+          -color_primaries=bt709 -color_trc=bt709 -colorspace=ycgco
+
+          ispace=bt709 space=ycgco itrc=bt709 trc=ycgco iprimaries=bt709 primaries=ycgco 
+          
+ffmpeg -h full >full.txt
+
+ffmpeg -i  C:\Users\MuZhi\Desktop\709.mp4 -vf  colorspace=bt709:ycgco   -c:a copy -colorspace ycgco 2019.mp4
+
+ffmpeg -i input -c:v libx264 -pix_fmt yuv420p  -color_primaries bt709 -color_trc bt709 -colorspace bt709 -vf "pad=width={W}:height={H}:x=0:y=0:color=black" output

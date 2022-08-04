@@ -35,7 +35,7 @@ index 4f418b6..d8c86df 100644
 +            {
 +                printf("\n0x%02x   : ",(ii/16)*16);
 +            }
-+            printf("0x%02x ",*((unsigned char *)(Buffer+ii)));
++            printf("0x%02x ",*((unsigned char *)(Buffer+Buffer_Offset+(size_t)Element_Offsetii)));
 +        }
 +        //printf("*\nBuffer=0x%llx\n",*((char *)Buffer));
 +        printf("\n");
@@ -84,7 +84,7 @@ index 8f579f3..e9d5b7b 100644
          else
              ToReturn=LastByte<<NewBits;
          LastByte=*Buffer;
-+        //printf("Buffer=0x%x Buffer=0x%x Buffer=0x%x  Buffer=0x%x \n",*Buffer,*(Buffer+1),*(Buffer+2),*(Buffer+3));
++        //printf("Buffer=0x%x Buffer=0x%x Buffer=0x%x  Buffer=0x%x \n",*Buffer,*(Buffer+1),*(Buffer+2),*(Buffer+3)); //如果Get_S1与BS_Begin dump buffer差异过大，可放开此处确认实际offset上的值
          Buffer++;
          Buffer_Size-=HowMany;
          ToReturn|=(LastByte>>(Buffer_Size%8))&Mask[NewBits];
