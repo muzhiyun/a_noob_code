@@ -210,3 +210,95 @@ esphome compile heimei.yaml
 [22:42:50][D][remote.tcl112:094]: TCL112:decode 230
 [22:42:50][D][remote.tcl112:106]: Byte 0 bit 0 fail
 //encode function verify fail,try again
+
+
+[00:29:05][D][tcl112.climate:182]: Checksum fail
+[00:29:05][D][remote.tcl112:097]: TCL112:decode 228
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 0 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 1 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 2 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 2 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 3 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 3 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 4 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 4 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 5 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 6 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 6 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 7 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 7 fail value=1
+[00:29:05][D][remote.tcl112:127]: i=00 Received: 23
+[00:29:05][D][remote.tcl112:127]: i=01 Received: CB
+[00:29:05][D][remote.tcl112:127]: i=02 Received: 26
+[00:29:05][D][remote.tcl112:127]: i=03 Received: 02
+[00:29:05][D][remote.tcl112:127]: i=04 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=05 Received: 40
+[00:29:05][D][remote.tcl112:127]: i=06 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=07 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=08 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=09 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0A Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0B Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0C Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0D Received: 65
+[00:29:05][D][remote.tcl112:141]: Checksum fail
+[00:29:05][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[00:29:05][D][climate:385]: 'AC66' - Sending state:
+[00:29:05][D][climate:388]:   Mode: COOL
+[00:29:05][D][climate:393]:   Fan Mode: AUTO
+[00:29:05][D][climate:405]:   Swing Mode: OFF
+[00:29:05][D][climate:414]:   Target Temperature: 27.00°C
+[00:29:05][D][remote.tcl112:097]: TCL112:decode 228
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 0 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 1 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 2 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 2 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 3 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 3 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 4 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 4 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 5 else value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 6 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 6 fail value=1
+[00:29:05][D][remote.tcl112:107]: Byte 0 bit 7 else value=0
+[00:29:05][D][remote.tcl112:115]: Byte 0 bit 7 fail value=1
+[00:29:05][D][remote.tcl112:127]: i=00 Received: 23
+[00:29:05][D][remote.tcl112:127]: i=01 Received: CB
+[00:29:05][D][remote.tcl112:127]: i=02 Received: 26
+[00:29:05][D][remote.tcl112:127]: i=03 Received: 01
+[00:29:05][D][remote.tcl112:127]: i=04 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=05 Received: 24
+[00:29:05][D][remote.tcl112:127]: i=06 Received: 03
+[00:29:05][D][remote.tcl112:127]: i=07 Received: 04
+[00:29:05][D][remote.tcl112:127]: i=08 Received: 01
+[00:29:05][D][remote.tcl112:127]: i=09 Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0A Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0B Received: 00
+[00:29:05][D][remote.tcl112:127]: i=0C Received: 80
+[00:29:05][D][remote.tcl112:127]: i=0D Received: C1
+[00:29:05][D][remote.tcl112:155]: Received TCL112: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[00:29:09][D][api:102]: Accepted 192.168.2.1
+[00:29:09][D][api.connection:861]: Home Assistant 2022.3.7 (192.168.2.1): Connected successfully
+
+
+
+[00:44:50][D][switch:013]: 'tcl112_onekey_27' Turning ON.
+[00:44:50][D][remote.tcl112:035]: TCL112:encode
+[00:44:50][D][remote.tcl112:061]: Sending: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[00:44:50][D][remote.tcl112:072]: Sending bit=01 
+[00:44:50][D][remote.tcl112:072]: Sending bit=01 
+[00:44:50][D][remote.tcl112:072]: Sending bit=00 
+[00:44:50][D][remote.tcl112:072]: Sending bit=00 
+[00:44:50][D][remote.tcl112:072]: Sending bit=00 
+[00:44:50][D][remote.tcl112:072]: Sending bit=01 
+[00:44:50][D][remote.tcl112:072]: Sending bit=00 
+[00:44:50][D][remote.tcl112:072]: Sending bit=00 
+[00:44:50][D][remote.tcl112:079]: TCL112Protocol::encode finish
+[00:44:50][D][remote_transmitter:075]: Sending remote code...
+[00:44:50][D][tcl112.climate:165]: Byte 0 bit 0 fail
+[00:44:50][D][remote.tcl112:097]: TCL112:decode 230
+[00:44:50][D][remote.tcl112:107]: Byte 0 bit 0 if value=0
+[00:44:50][D][remote.tcl112:115]: Byte 0 bit 0 else value=0
+[00:44:50][D][remote.tcl112:120]: fail value=0
+[00:44:50][D][remote.tcl112:120]: fail value=0
+[00:44:50][D][remote.tcl112:120]: fail value=0
