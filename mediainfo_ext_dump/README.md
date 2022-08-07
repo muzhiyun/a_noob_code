@@ -1,26 +1,26 @@
-某天，我的客户抱怨他们在小米11手机上，使用微信内置的摄像功能拍摄了一段视频，然而硬件解码器播放这段视频时却出现了错误的颜色。当使用软件解码器和其他平台，颜色正常。使用PC测试时，除了potplayer显示了同样错误的颜色之外，其他播放器也显示了正常的颜色。
+One day, my client complained that they shot a video on the Mi 11 using the built-in camera function of WeChat, but the hardware decoder displayed the wrong color when playing the video. When using software codecs and other platforms, the colors are normal. When testing with PC, other players show normal colors except potplayer showing the same wrong colors.
 
-我拿到一份示例文件。mediainfo中矩阵系数显示为YCgCo引起了我的注意，我开始怀疑这段视频是否声明了错误的参数，我注意到将播放器固定为BT.709后，显示的颜色恢复了正常。当我关闭potplayer选项卡中的YCgCo时，颜色也恢复了正常，我的同事协助从这份和另一份正常文件的数据流中找到了两个相似的像素点的数据，并通过YUV2RGB、YCgCo2RGB的演算，他确认：这段视频应当是BT.709的YUV格式，而并非宣告的YCgCo。感谢他的工作，但除此之外，我想喜欢用更简单直观的方式验证这一猜想，比如通过修改这段视频的metadata改正YCgCo为BT.709。众所周知，H.264使用头部的sps和pps帧来宣告基本信息，使用NAL存储数据，然而，当我面对hex editer打开视频后的数据，我应该如何确认哪一个字节存储的是矩阵系数？
+I get a sample file. The matrix coefficients displayed as YCgCo in mediainfo caught my attention, I started to wonder if the video was declaring the wrong parameters, I noticed that after fixing the player to BT.709, the displayed colors returned to normal. When I turned off YCgCo in the potplayer tab, the color also returned to normal, my colleague assisted to find the data of two similar pixels from the data stream of this and another normal file, and passed YUV2RGB, YCgCo2RGB According to the calculation, he confirmed that this video should be in the YUV format of BT.709, not the declared YCgCo. Thanks for his work, but other than that, I would like to test this conjecture in a simpler and more intuitive way, such as correcting YCgCo to BT.709 by modifying the metadata of this video. As we all know, H.264 uses sps and pps frames in the header to announce basic information, and uses NAL to store data. However, when I face the data after opening the video file with hex editor, how should I confirm which byte stores the matrix? coefficient?
 
-我在Google上寻找了许多宣称可以修改exif、HDR metadata、MP4 info的软件，令人沮丧的是，直到现在，我仍然没有找到一款软件，能实现修改AVC中的matrix_coefficients。
+I searched for a lot of software on Google that claims to modify exif, HDR metadata, MP4 info, and frustratingly, until now, I still haven't found a software that can modify the matrix_coefficients in AVC.
 
-最后，我开始下载并开始分析mediainfo的源代码，感谢伟大的开源项目，我选择了MediaInfo_CLI_GNU为测试对象。mediainfo依赖mediainfoLib和Zenlib，轻松地追踪到Zenlib提供了一系列Get1、Get2等接口。mediainfoLib使用这些接口来获取文件信息，使用BS放置文件内容的一部分，其中获取各个参数的方法看起来很有趣，每个信息的获取都与一段BS+BS_offest对应，我最终做了patch文件，这个patch帮助打印出matrix_coefficients在文件中的hex值，这让我可以通过只修改1Byte metadate，就可以将YCgCo修改为BT.709，修改之后该视频成功播放出了正确的颜色。
+Finally, I started downloading and started analyzing the source code of mediainfo, thanks to the great open source project, I chose MediaInfo_CLI_GNU as the test object. mediainfo relies on mediainfoLib and Zenlib, and it is easy to trace that Zenlib provides a series of Get1, Get2 and other interfaces. mediainfoLib uses these interfaces to obtain file information, and uses BS to place a part of the file content. The method of obtaining various parameters looks interesting. The acquisition of each information corresponds to a section of BS+BS_offest. I finally made a patch file, this patch Helps to print out the hex value of matrix_coefficients in the file, which allows me to modify YCgCo to BT.709 by only modifying 1Byte metadata. After modification, the video successfully plays the correct color.
 
-当我把这个实验描述给我的顾客，告知他错误的颜色是因为示例文件错误时，他感到很诧异，"为什么？如果是示例文件错误，为什么软件解码和PC上除potplayer之外的播放器都显示正确的颜色？"
+When I described these experiments to my customer and told him that the wrong colors were because of the wrong sample files, he was amazed, "Why? If the sample files are wrong, why software decoding and players other than potplayer on PC display the correct color?"
 
-事实上，我也想了解其他多媒体播放器是如何做到这点，但那时我无法解释只好耸耸肩："可能其他的平台和软件不支持YCgCo所以忽略了错误的信息？"，接着，客户向我索要一段真正的YCgCo文件，他想看确认事实是否真的如此。
+In fact, I also wanted to know how other multimedia players do this, but at the time I couldn't explain it so I shrugged: "Maybe other platforms and software don't support YCgCo and so ignore the wrong information?", then, the customer Asked me for a real YCgCo video file, he wanted to see if that was the case.
 
-所以，我开始接着在网上搜索，老天，这是一个多么奇怪的SDR格式，这里有一些关于此格式的介绍，却没有任何一份YCgCo的测试文件，直到我搜索到了这个issue：https://bugs.chromium.org/p/chromium/issues/detail?id=1085434 ，在下载了demo.mp4.zip后，我发现这份文件与我得到的示例文件相同：同样宣告了YCgCo，同样出现了错误的颜色，我开始完整的阅读这个issue，当我读到"紫色的沙子"、"这是最初 YCbCr（BT.709 或 BT.601 matrix_coefficients）中的视频，它只是被标记为 YCgCo matrix_coefficients"时，我意识到，chromium和我遇到了同一个问题。这个issue中使用的demo.mp4同样是一份错误宣告了YCgCo的BT.709视频文件。
+So, I started to search on the Internet, God, what a strange SDR format, there are a lot of introductions about this format, but there is no YCgCo test file, until I searched for this issue: https:/ /bugs.chromium.org/p/chromium/issues/detail?id=1085434 , after downloading the demo.mp4.zip, I found that this file is the same as the sample file I got: also declares YCgCo, also appears Wrong color, I started to peruse this issue, when I read "purple sand", "this is the video in the original YCbCr (BT.709 or BT.601 matrix_coefficients), it was just marked as YCgCo matrix_coefficients", I realized that chromium and I had the same problem. The demo.mp4 used in this issue is also a BT.709 video file that falsely declares YCgCo.
 
-接着我在 https://github.com/mpv-player/mpv/issues/4340 找到了issue中这份demo.mp4.zip的源头 ，看起来mpv也遇到了同样的问题，并且得到了相同的结论。当mpv的讨论中有人问到"我们是否还有其他的YCgCo样本时"，我看到mc4man回答"您可能可以使用 ffmpeg 创建各种测试文件，可能使用类似-x264-params colormatrix=YCgCo 的参数",好主意！
+Then I found the source of the demo.mp4.zip in the issue at https://github.com/mpv-player/mpv/issues/4340, it seems that mpv also encountered the same problem, and got the same conclusion . When someone in the mpv discussion asked "do we have any other samples of YCgCo", I saw mc4man answer "You could probably use ffmpeg to create various test files, possibly with parameters like -x264-params colormatrix=YCgCo" ,good idea!
 
-经过不断的测试后，我发现使用下面的指令可以将一段BT.709的媒体文件转为YCgCo:
+After continuous testing, I found that using the following command can convert a BT.709 media file to YCgCo:
 
-`ffmpeg -i  BT709.mp4 -vf  colorspace=bt709:ycgco   -c:a copy -color_primaries bt709 -color_trc bt709 -colorspace ycgco YCgCo.mp4`
+`ffmpeg -i BT709.mp4 -vf colorspace=bt709:ycgco -c:a copy -color_primaries bt709 -color_trc bt709 -colorspace ycgco YCgCo.mp4`
 
-转换后的文件参数依然显示YCgCo，但这是一份真正的YCgCo，远远不止仅修改metadata，当不关闭potplayer的'YCgCo优化'选项，它也能正确播放。伟大的ffmpeg和mediainfo。我将生成的文件发送给客户，同时告诉他chromium和mpv也遇到了这样的问题，他接受了这个事实。
+The converted file parameters still show YCgCo, but this is a real YCgCo, far more than just modifying the metadata. It can also be played correctly when the 'YCgCo optimization' option of potplayer is not turned off. Great ffmpeg and mediainfo. I sent the generated file to the client and told him that chromium and mpv had the same problem and he accepted the fact.
 
-如果你也是一位在寻找YCgCo样本文件的人，那么祝贺你，这个repo存放着目前Google上唯一的真正的YCgCo示例文件。
+If you're also someone looking for YCgCo sample files, congratulations, this repo houses the only real YCgCo sample files currently available on Google.
 
 
 
