@@ -10,6 +10,8 @@ namespace remote_base {
 const float TCL112_TEMP_MAX = 31.0;
 const float TCL112_TEMP_MIN = 16.0;
 
+const uint16_t TCL112_STATE_LENGTH = 14;
+const uint16_t TCL112_BITS = TCL112_STATE_LENGTH * 8;
 
 
 
@@ -18,9 +20,11 @@ struct TCL112Data {
   uint8_t toggle : 1;
   uint8_t address;
   uint8_t command;
-
+  uint8_t remote_state[TCL112_STATE_LENGTH];
   bool operator==(const TCL112Data &rhs) const { return address == rhs.address && command == rhs.command; }
 };
+
+
 
 class TCL112Protocol : public RemoteProtocol<TCL112Data> {
  public:

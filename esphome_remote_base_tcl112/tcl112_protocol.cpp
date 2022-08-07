@@ -6,10 +6,6 @@ namespace remote_base {
 
 static const char *const TCL112_TAG = "remote.tcl112";
 
-
-const uint16_t TCL112_STATE_LENGTH = 14;
-const uint16_t TCL112_BITS = TCL112_STATE_LENGTH * 8;
-
 const uint8_t TCL112_HEAT = 1;
 const uint8_t TCL112_DRY = 2;
 const uint8_t TCL112_COOL = 3;
@@ -33,20 +29,51 @@ const uint16_t TCL112_ONE_SPACE = 1100;
 const uint16_t TCL112_ZERO_SPACE = 350;
 const uint32_t TCL112_GAP = TCL112_HEADER_SPACE;
 
-static const uint16_t TCL112_FREQ = 36000;
+static const uint16_t TCL112_FREQ = 38000;
 
 void TCL112Protocol::encode(RemoteTransmitData *dst, const TCL112Data &data) {
+  ESP_LOGD(TCL112_TAG, "TCL112:encode");
   dst->reserve(TCL112_BITS);
   dst->set_carrier_frequency(TCL112_FREQ);
+  uint8_t tmp_remote_state[TCL112_STATE_LENGTH];
+  //23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+  tmp_remote_state[0]=0x23;
+  tmp_remote_state[1]=0xCB;
+  tmp_remote_state[2]=0x26;
+  tmp_remote_state[3]=0x01;
+  tmp_remote_state[4]=0x00;
+  tmp_remote_state[5]=0x24;
+  tmp_remote_state[6]=0x03;
+  tmp_remote_state[7]=0x04;
+  tmp_remote_state[8]=0x01;
+  tmp_remote_state[9]=0x00;
+  tmp_remote_state[10]=0x00;
+  tmp_remote_state[11]=0x00;
+  tmp_remote_state[12]=0x80;
+  tmp_remote_state[13]=0xC1;
 
   // Encode header
   dst->item(TCL112_HEADER_MARK, TCL112_HEADER_SPACE);
 
-  int32_t next{0};
-
-  // Encode startbit+mode
-  uint8_t header{static_cast<uint8_t>((1 << 3) | data.mode)};
-  ESP_LOGVV(TAG, "TCL112Protocol::encode fail");
+  // Header
+  dst->mark(TCL112_HEADER_MARK);
+  dst->space(TCL112_HEADER_SPACE);
+    ESP_LOGD(TCL112_TAG, "Sending: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X", tmp_remote_state[0],
+           tmp_remote_state[1], tmp_remote_state[2], tmp_remote_state[3], tmp_remote_state[4], tmp_remote_state[5], tmp_remote_state[6],
+           tmp_remote_state[7], tmp_remote_state[8], tmp_remote_state[9], tmp_remote_state[10], tmp_remote_state[11], tmp_remote_state[12],
+           tmp_remote_state[13]);
+  // Data
+  for (uint8_t i : tmp_remote_state) {
+    for (uint8_t j = 0; j < 8; j++) {
+      dst->mark(TCL112_BIT_MARK);
+      bool bit = i & (1 << j);
+      dst->space(bit ? TCL112_ONE_SPACE : TCL112_ZERO_SPACE);
+    }
+  }
+  // Footer
+  dst->mark(TCL112_BIT_MARK);
+  dst->space(TCL112_GAP);
+  ESP_LOGD(TCL112_TAG, "TCL112Protocol::encode finish");
 
 }
 
@@ -56,31 +83,34 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
       .toggle = 0,
       .address = 0,
       .command = 0,
+      .remote_state = {0},
   };
-
-
+    
 // Validate header
   if (!src.expect_item(TCL112_HEADER_MARK, TCL112_HEADER_SPACE)) {
-    ESP_LOGVV(TAG, "Header fail");
+    ESP_LOGVV(TCL112_TAG, "Header fail");
    return {};
   }
+  ESP_LOGD(TCL112_TAG, "TCL112:decode %ld",src.size());
 
-  uint8_t remote_state[TCL112_STATE_LENGTH] = {0};
+
+
   // Read all bytes.
   for (int i = 0; i < TCL112_STATE_LENGTH; i++) {
     // Read bit
     for (int j = 0; j < 8; j++) {
       if (src.expect_item(TCL112_BIT_MARK, TCL112_ONE_SPACE)) {
-        remote_state[i] |= 1 << j;
+        data.remote_state[i] |= 1 << j;
+        ESP_LOGD(TCL112_TAG, "i=%02X Received: %02X",i,data.remote_state[i]);
       } else if (!src.expect_item(TCL112_BIT_MARK, TCL112_ZERO_SPACE)) {
-        ESP_LOGVV(TAG, "Byte %d bit %d fail", i, j);
+        ESP_LOGD(TCL112_TAG, "Byte %d bit %d fail", i, j);
         return {};
       }
     }
   }
   // Validate footer
   if (!src.expect_mark(TCL112_BIT_MARK)) {
-    ESP_LOGVV(TAG, "Footer fail");
+    ESP_LOGD(TCL112_TAG, "Footer fail");
     return {};
   }
 
@@ -88,24 +118,26 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
   // Calculate & set the checksum for the current internal state of the remote.
   // Stored the checksum value in the last byte.
   for (uint8_t checksum_byte = 0; checksum_byte < TCL112_STATE_LENGTH - 1; checksum_byte++)
-    checksum += remote_state[checksum_byte];
-  if (checksum != remote_state[TCL112_STATE_LENGTH - 1]) {
-    ESP_LOGVV(TAG, "Checksum fail");
+    checksum +=  data.remote_state[checksum_byte];
+  if (checksum !=  data.remote_state[TCL112_STATE_LENGTH - 1]) {
+    ESP_LOGD(TCL112_TAG, "Checksum fail");
     return {};
   
   }
 
-  ESP_LOGV(TAG, "Received: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
-           remote_state[0], remote_state[1], remote_state[2], remote_state[3], remote_state[4], remote_state[5],
-           remote_state[6], remote_state[7], remote_state[8], remote_state[9], remote_state[10], remote_state[11],
-           remote_state[12], remote_state[13]);
-   return {};
+  ESP_LOGV(TCL112_TAG, "decode Received: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
+            data.remote_state[0],  data.remote_state[1],  data.remote_state[2],  data.remote_state[3],  data.remote_state[4],  data.remote_state[5],
+            data.remote_state[6],  data.remote_state[7],  data.remote_state[8],  data.remote_state[9],  data.remote_state[10],  data.remote_state[11],
+            data.remote_state[12],  data.remote_state[13]);
+   return data;
 
 }
 
 void TCL112Protocol::dump(const TCL112Data &data) {
-  ESP_LOGD(TCL112_TAG, "Received TCL112: mode=0x%X, address=0x%02X, command=0x%02X, toggle=0x%X", data.mode, data.address,
-           data.command, data.toggle);
+  ESP_LOGD(TCL112_TAG, "Received TCL112: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
+            data.remote_state[0],  data.remote_state[1],  data.remote_state[2],  data.remote_state[3],  data.remote_state[4],  data.remote_state[5],
+            data.remote_state[6],  data.remote_state[7],  data.remote_state[8],  data.remote_state[9],  data.remote_state[10],  data.remote_state[11],
+            data.remote_state[12],  data.remote_state[13]);
 }
 
 }  // namespace remote_base

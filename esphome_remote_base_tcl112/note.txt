@@ -1,0 +1,212 @@
+
+docker run -d --name="esphome"  -e TZ=Asia/Shanghai   --restart unless-stopped  --net=host  -v /opt/data/esphome/config:/config esphome/esphome:latest
+
+/esphome/esphome/components/remote_base/toshiba_ac_protocol.cpp
+
+docker exec -it esphome /bin/bash
+
+cp /config/__init__.py /esphome/esphome/components/remote_base/
+
+esphome compile heimei.yaml
+
+[21:06:17][D][tcl112.climate:154]: Tcl112Climate:decode 228
+[21:06:17][D][tcl112.climate:181]: Checksum fail
+[21:06:17][D][remote.tcl112:067]: TCL112:decode 228
+[21:06:17][D][remote.tcl112:077]: i=00 Received: 01
+[21:06:17][D][remote.tcl112:077]: i=00 Received: 03
+[21:06:17][D][remote.tcl112:077]: i=00 Received: 23
+[21:06:17][D][remote.tcl112:077]: i=01 Received: 01
+[21:06:17][D][remote.tcl112:077]: i=01 Received: 03
+[21:06:17][D][remote.tcl112:077]: i=01 Received: 0B
+[21:06:17][D][remote.tcl112:077]: i=01 Received: 4B
+[21:06:17][D][remote.tcl112:077]: i=01 Received: CB
+[21:06:17][D][remote.tcl112:077]: i=02 Received: 02
+[21:06:17][D][remote.tcl112:077]: i=02 Received: 06
+[21:06:17][D][remote.tcl112:077]: i=02 Received: 26
+[21:06:17][D][remote.tcl112:077]: i=03 Received: 02
+[21:06:17][D][remote.tcl112:077]: i=05 Received: 40
+[21:06:17][D][remote.tcl112:077]: i=0D Received: 01
+[21:06:17][D][remote.tcl112:077]: i=0D Received: 05
+[21:06:17][D][remote.tcl112:077]: i=0D Received: 25
+[21:06:17][D][remote.tcl112:077]: i=0D Received: 65
+[21:06:17][D][remote.tcl112:096]: Checksum fail
+[21:06:17][D][tcl112.climate:154]: Tcl112Climate:decode 228
+[21:06:17][D][tcl112.climate:185]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[21:06:17][D][climate:385]: 'AC66' - Sending state:
+[21:06:17][D][climate:388]:   Mode: COOL
+[21:06:17][D][climate:393]:   Fan Mode: AUTO
+[21:06:17][D][climate:405]:   Swing Mode: OFF
+[21:06:17][D][climate:414]:   Target Temperature: 27.00°C
+[21:06:19][D][api:102]: Accepted 192.168.2.1
+//why remote.tcl112 Checksum fail when tcl112.climate decode pass ?
+
+[21:12:24][D][tcl112.climate:154]: Tcl112Climate:decode 78
+[21:12:24][D][tcl112.climate:165]: Byte 0 bit 0 fail
+[21:12:24][D][remote.tcl112:067]: TCL112:decode 78
+[21:12:24][D][remote.tcl112:079]: Byte 0 bit 0 fail
+[21:12:26][D][tcl112.climate:154]: Tcl112Climate:decode 228
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 03
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 23
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 03
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 0B
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 4B
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: CB
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 02
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 06
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 26
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=03 Received: 02
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=05 Received: 40
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 05
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 25
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 65
+[21:12:26][D][tcl112.climate:182]: Checksum fail
+[21:12:26][D][remote.tcl112:067]: TCL112:decode 228
+[21:12:26][D][remote.tcl112:077]: i=00 Received: 01
+[21:12:26][D][remote.tcl112:077]: i=00 Received: 03
+[21:12:26][D][remote.tcl112:077]: i=00 Received: 23
+[21:12:26][D][remote.tcl112:077]: i=01 Received: 01
+[21:12:26][D][remote.tcl112:077]: i=01 Received: 03
+[21:12:26][D][remote.tcl112:077]: i=01 Received: 0B
+[21:12:26][D][remote.tcl112:077]: i=01 Received: 4B
+[21:12:26][D][remote.tcl112:077]: i=01 Received: CB
+[21:12:26][D][remote.tcl112:077]: i=02 Received: 02
+[21:12:26][D][remote.tcl112:077]: i=02 Received: 06
+[21:12:26][D][remote.tcl112:077]: i=02 Received: 26
+[21:12:26][D][remote.tcl112:077]: i=03 Received: 02
+[21:12:26][D][remote.tcl112:077]: i=05 Received: 40
+[21:12:26][D][remote.tcl112:077]: i=0D Received: 01
+[21:12:26][D][remote.tcl112:077]: i=0D Received: 05
+[21:12:26][D][remote.tcl112:077]: i=0D Received: 25
+[21:12:26][D][remote.tcl112:077]: i=0D Received: 65
+[21:12:26][D][remote.tcl112:096]: Checksum fail
+[21:12:26][D][tcl112.climate:154]: Tcl112Climate:decode 228
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 03
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=00 Received: 23
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 03
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 0B
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: 4B
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=01 Received: CB
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 02
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 06
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=02 Received: 26
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=03 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=05 Received: 04
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=05 Received: 24
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=06 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=06 Received: 03
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=07 Received: 04
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=08 Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0C Received: 80
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 01
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: 41
+[21:12:26][D][tcl112.climate:163]: Tcl112Climate i=0D Received: C1
+[21:12:26][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[21:12:26][D][climate:385]: 'AC66' - Sending state:
+[21:12:26][D][climate:388]:   Mode: COOL
+[21:12:26][D][climate:393]:   Fan Mode: AUTO
+[21:12:26][D][climate:405]:   Swing Mode: OFF
+[21:12:26][D][climate:414]:   Target Temperature: 27.00°C
+//cant handle data twice due to tcl112.climate  return true 
+
+
+[21:24:28][D][remote.tcl112:067]: TCL112:decode 228
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 03
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 23
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 03
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 0B
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 4B
+[21:24:28][D][remote.tcl112:077]: i=01 Received: CB
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 02
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 06
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 26
+[21:24:28][D][remote.tcl112:077]: i=03 Received: 02
+[21:24:28][D][remote.tcl112:077]: i=05 Received: 40
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 01
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 05
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 25
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 65
+[21:24:28][D][remote.tcl112:096]: Checksum fail
+[21:24:28][D][remote.tcl112:067]: TCL112:decode 228
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 03
+[21:24:28][D][remote.tcl112:077]: i=00 Received: 23
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 03
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 0B
+[21:24:28][D][remote.tcl112:077]: i=01 Received: 4B
+[21:24:28][D][remote.tcl112:077]: i=01 Received: CB
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 02
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 06
+[21:24:28][D][remote.tcl112:077]: i=02 Received: 26
+[21:24:28][D][remote.tcl112:077]: i=03 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=05 Received: 04
+[21:24:28][D][remote.tcl112:077]: i=05 Received: 24
+[21:24:28][D][remote.tcl112:077]: i=06 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=06 Received: 03
+[21:24:28][D][remote.tcl112:077]: i=07 Received: 04
+[21:24:28][D][remote.tcl112:077]: i=08 Received: 01
+[21:24:28][D][remote.tcl112:077]: i=0C Received: 80
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 01
+[21:24:28][D][remote.tcl112:077]: i=0D Received: 41
+[21:24:28][D][remote.tcl112:077]: i=0D Received: C1
+[21:24:28][D][remote.tcl112:101]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+//after disable tcl112.climate,remote.tcl112 get data.the decode function verify Pass!
+
+
+[21:38:38][D][tcl112.climate:182]: Checksum fail
+[21:38:38][D][remote.tcl112:096]: Checksum fail
+[21:38:38][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[21:38:38][D][climate:385]: 'AC66' - Sending state:
+[21:38:38][D][climate:388]:   Mode: COOL
+[21:38:38][D][climate:393]:   Fan Mode: AUTO
+[21:38:38][D][climate:405]:   Swing Mode: OFF
+[21:38:38][D][climate:414]:   Target Temperature: 27.00°C
+[21:38:38][D][remote.tcl112:101]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+//loglevel change,try to finish the dump function
+
+
+[21:48:09][D][tcl112.climate:182]: Checksum fail
+[21:48:09][D][remote.tcl112:096]: Checksum fail
+[21:48:10][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[21:48:10][D][climate:385]: 'AC66' - Sending state:
+[21:48:10][D][climate:388]:   Mode: COOL
+[21:48:10][D][climate:393]:   Fan Mode: AUTO
+[21:48:10][D][climate:405]:   Swing Mode: OFF
+[21:48:10][D][climate:414]:   Target Temperature: 27.00°C
+[21:48:10][D][remote.tcl112:101]: decode Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[21:48:10][D][remote.tcl112:110]: Received TCL112: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+//dump func verify Pass! try to implementing the encode function
+
+
+[22:17:14][D][text_sensor:067]: 'Current time': Sending state '2022-08-07 22:17'
+[22:17:39][D][tcl112.climate:182]: Checksum fail
+[22:17:39][D][remote.tcl112:122]: Checksum fail
+[22:17:39][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[22:17:39][D][climate:385]: 'AC66' - Sending state:
+[22:17:39][D][climate:388]:   Mode: COOL
+[22:17:39][D][climate:393]:   Fan Mode: AUTO
+[22:17:39][D][climate:405]:   Swing Mode: OFF
+[22:17:39][D][climate:414]:   Target Temperature: 27.00°C
+[22:17:39][D][remote.tcl112:136]: Received TCL112: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[22:17:54][D][switch:013]: 'onekey_16_strong' Turning ON.
+[22:17:54][D][remote.tcl112:038]: TCL112:encode
+[22:17:54][D][remote.tcl112:075]: TCL112Protocol::encode finish
+[22:17:54][D][remote_transmitter:075]: Sending remote code...
+//encode function verify fail,try again
+
+[22:42:50][D][switch:013]: 'tcl112_onekey_27' Turning ON.
+[22:42:50][D][remote.tcl112:035]: TCL112:encode
+[22:42:50][D][remote.tcl112:061]: Sending: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[22:42:50][D][remote.tcl112:076]: TCL112Protocol::encode finish
+[22:42:50][D][remote_transmitter:075]: Sending remote code...
+[22:42:50][D][tcl112.climate:165]: Byte 0 bit 0 fail
+[22:42:50][D][remote.tcl112:094]: TCL112:decode 230
+[22:42:50][D][remote.tcl112:106]: Byte 0 bit 0 fail
+//encode function verify fail,try again
