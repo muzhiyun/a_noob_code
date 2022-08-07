@@ -92,12 +92,14 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
   if (checksum != remote_state[TCL112_STATE_LENGTH - 1]) {
     ESP_LOGVV(TAG, "Checksum fail");
     return {};
+  
   }
 
   ESP_LOGV(TAG, "Received: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
            remote_state[0], remote_state[1], remote_state[2], remote_state[3], remote_state[4], remote_state[5],
            remote_state[6], remote_state[7], remote_state[8], remote_state[9], remote_state[10], remote_state[11],
            remote_state[12], remote_state[13]);
+   return {};
 
 }
 
