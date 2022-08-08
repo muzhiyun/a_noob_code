@@ -33,7 +33,7 @@ static const uint16_t TCL112_FREQ = 38000;
 
 void TCL112Protocol::encode(RemoteTransmitData *dst, const TCL112Data &data) {
   ESP_LOGD(TCL112_TAG, "TCL112:encode");
-  dst->reserve(TCL112_BITS);
+  //dst->reserve(TCL112_BITS);
   dst->set_carrier_frequency(TCL112_FREQ);
   uint8_t tmp_remote_state[TCL112_STATE_LENGTH];
   //23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
@@ -52,16 +52,15 @@ void TCL112Protocol::encode(RemoteTransmitData *dst, const TCL112Data &data) {
   tmp_remote_state[12]=0x80;
   tmp_remote_state[13]=0xC1;
 
-  // Encode header
-  dst->item(TCL112_HEADER_MARK, TCL112_HEADER_SPACE);
+  ESP_LOGD(TCL112_TAG, "Sending: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X", tmp_remote_state[0],
+        tmp_remote_state[1], tmp_remote_state[2], tmp_remote_state[3], tmp_remote_state[4], tmp_remote_state[5], tmp_remote_state[6],
+        tmp_remote_state[7], tmp_remote_state[8], tmp_remote_state[9], tmp_remote_state[10], tmp_remote_state[11], tmp_remote_state[12],
+        tmp_remote_state[13]);
 
   // Header
   dst->mark(TCL112_HEADER_MARK);
   dst->space(TCL112_HEADER_SPACE);
-    ESP_LOGD(TCL112_TAG, "Sending: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X", tmp_remote_state[0],
-           tmp_remote_state[1], tmp_remote_state[2], tmp_remote_state[3], tmp_remote_state[4], tmp_remote_state[5], tmp_remote_state[6],
-           tmp_remote_state[7], tmp_remote_state[8], tmp_remote_state[9], tmp_remote_state[10], tmp_remote_state[11], tmp_remote_state[12],
-           tmp_remote_state[13]);
+
   // Data
   for (uint8_t i : tmp_remote_state) {
     for (uint8_t j = 0; j < 8; j++) {
@@ -91,9 +90,7 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
     ESP_LOGVV(TCL112_TAG, "Header fail");
    return {};
   }
-  ESP_LOGD(TCL112_TAG, "TCL112:decode %ld",src.size());
-
-
+  ESP_LOGV(TCL112_TAG, "TCL112:decode %ld",src.size());
 
   // Read all bytes.
   for (int i = 0; i < TCL112_STATE_LENGTH; i++) {
@@ -101,7 +98,7 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
     for (int j = 0; j < 8; j++) {
       if (src.expect_item(TCL112_BIT_MARK, TCL112_ONE_SPACE)) {
         data.remote_state[i] |= 1 << j;
-        ESP_LOGD(TCL112_TAG, "i=%02X Received: %02X",i,data.remote_state[i]);
+        ESP_LOGV(TCL112_TAG, "i=%02X Received: %02X",i,data.remote_state[i]);
       } else if (!src.expect_item(TCL112_BIT_MARK, TCL112_ZERO_SPACE)) {
         ESP_LOGD(TCL112_TAG, "Byte %d bit %d fail", i, j);
         return {};

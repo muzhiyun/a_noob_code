@@ -302,3 +302,18 @@ esphome compile heimei.yaml
 [00:44:50][D][remote.tcl112:120]: fail value=0
 [00:44:50][D][remote.tcl112:120]: fail value=0
 [00:44:50][D][remote.tcl112:120]: fail value=0
+
+
+[22:54:45][D][switch:013]: 'tcl112_onekey_27' Turning ON.
+[22:54:45][D][remote.tcl112:035]: TCL112:encode
+[22:54:45][D][remote.tcl112:055]: Sending: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[22:54:45][D][remote.tcl112:075]: TCL112Protocol::encode finish
+[22:54:45][D][remote_transmitter:075]: Sending remote code...
+[22:54:45][D][tcl112.climate:186]: Received: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+[22:54:45][D][climate:385]: 'AC66' - Sending state:
+[22:54:45][D][climate:388]:   Mode: COOL
+[22:54:45][D][climate:393]:   Fan Mode: AUTO
+[22:54:45][D][climate:405]:   Swing Mode: OFF
+[22:54:45][D][climate:414]:   Target Temperature: 27.00°C
+[22:54:45][D][remote.tcl112:140]: Received TCL112: 23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
+//encode function verify pass
