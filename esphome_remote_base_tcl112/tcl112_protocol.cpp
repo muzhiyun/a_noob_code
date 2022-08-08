@@ -33,36 +33,19 @@ static const uint16_t TCL112_FREQ = 38000;
 
 void TCL112Protocol::encode(RemoteTransmitData *dst, const TCL112Data &data) {
   ESP_LOGD(TCL112_TAG, "TCL112:encode");
+  ESP_LOGD(TCL112_TAG, "encode TCL112: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
+          data.remote_state[0],  data.remote_state[1],  data.remote_state[2],  data.remote_state[3],  data.remote_state[4],  data.remote_state[5],
+          data.remote_state[6],  data.remote_state[7],  data.remote_state[8],  data.remote_state[9],  data.remote_state[10],  data.remote_state[11],
+          data.remote_state[12],  data.remote_state[13]);
   //dst->reserve(TCL112_BITS);
   dst->set_carrier_frequency(TCL112_FREQ);
-  uint8_t tmp_remote_state[TCL112_STATE_LENGTH];
-  //23 CB 26 01   00 24 03 04   01 00 00 00   80 C1
-  tmp_remote_state[0]=0x23;
-  tmp_remote_state[1]=0xCB;
-  tmp_remote_state[2]=0x26;
-  tmp_remote_state[3]=0x01;
-  tmp_remote_state[4]=0x00;
-  tmp_remote_state[5]=0x24;
-  tmp_remote_state[6]=0x03;
-  tmp_remote_state[7]=0x04;
-  tmp_remote_state[8]=0x01;
-  tmp_remote_state[9]=0x00;
-  tmp_remote_state[10]=0x00;
-  tmp_remote_state[11]=0x00;
-  tmp_remote_state[12]=0x80;
-  tmp_remote_state[13]=0xC1;
-
-  ESP_LOGD(TCL112_TAG, "Sending: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X", tmp_remote_state[0],
-        tmp_remote_state[1], tmp_remote_state[2], tmp_remote_state[3], tmp_remote_state[4], tmp_remote_state[5], tmp_remote_state[6],
-        tmp_remote_state[7], tmp_remote_state[8], tmp_remote_state[9], tmp_remote_state[10], tmp_remote_state[11], tmp_remote_state[12],
-        tmp_remote_state[13]);
 
   // Header
   dst->mark(TCL112_HEADER_MARK);
   dst->space(TCL112_HEADER_SPACE);
 
   // Data
-  for (uint8_t i : tmp_remote_state) {
+  for (uint8_t i :  data.remote_state) {
     for (uint8_t j = 0; j < 8; j++) {
       dst->mark(TCL112_BIT_MARK);
       bool bit = i & (1 << j);

@@ -37,17 +37,23 @@ DECLARE_REMOTE_PROTOCOL(TCL112)
 
 template<typename... Ts> class TCL112Action : public RemoteTransmitterActionBase<Ts...> {
  public:
-  TEMPLATABLE_VALUE(uint8_t, address)
-  TEMPLATABLE_VALUE(uint8_t, command)
+  //TEMPLATABLE_VALUE(uint8_t, address)
+  //TEMPLATABLE_VALUE(uint8_t, remote_state)
+  TEMPLATABLE_VALUE(std::vector<uint8_t>, code)
+
+  TCL112Data data{};
+
+  void set_code(const std::vector<uint8_t> &code) { memcpy((char*)data.remote_state,(char*)code.data(),14); }
 
   void encode(RemoteTransmitData *dst, Ts... x) {
-    TCL112Data data{};
-    data.mode = 0;
-    data.toggle = this->toggle_;
-    data.address = this->address_.value(x...);
-    data.command = this->command_.value(x...);
+    
+    //data.mode = 0;
+    //data.toggle = this->toggle_;
+    //data.address = this->address_.value(x...);
+    //data.command = this->command_.value(x...);
+    //data.remote_state = this->remote_state_.value(x...);
     TCL112Protocol().encode(dst, data);
-    this->toggle_ = !this->toggle_;
+    //this->toggle_ = !this->toggle_;
   }
 
  protected:

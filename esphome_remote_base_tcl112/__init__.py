@@ -773,8 +773,10 @@ async def rc6_action(var, config, args):
 TCL112Data, TCL112BinarySensor, TCL112Trigger, TCL112Action, TCL112Dumper = declare_protocol("TCL112")
 TCL112_SCHEMA = cv.Schema(
     {
-        cv.Required(CONF_ADDRESS): cv.hex_uint8_t,
-        cv.Required(CONF_COMMAND): cv.hex_uint8_t,
+        cv.Required(CONF_CODE): cv.All(
+            [cv.Any(cv.hex_uint8_t, cv.uint8_t)],
+            cv.Length(min=14, max=14),
+        ),
     }
 )
 
@@ -785,9 +787,7 @@ def tcl112_binary_sensor(var, config):
         var.set_data(
             cg.StructInitializer(
                 TCL112Data,
-                ("device", config[CONF_DEVICE]),
-                ("address", config[CONF_ADDRESS]),
-                ("command", config[CONF_COMMAND]),
+                ("remote_state", config[CONF_CODE]),
             )
         )
     )
@@ -805,10 +805,15 @@ def tcl112_dumper(var, config):
 
 @register_action("tcl112", TCL112Action, TCL112_SCHEMA)
 async def tcl112_action(var, config, args):
-    template_ = await cg.templatable(config[CONF_ADDRESS], args, cg.uint8)
-    cg.add(var.set_address(template_))
-    template_ = await cg.templatable(config[CONF_COMMAND], args, cg.uint8)
-    cg.add(var.set_command(template_))
+    # cg.add(
+    #     var.set_data(
+    #         cg.StructInitializer(
+    #             TCL112Data,
+    #             ("remote_state", config[CONF_CODE]),
+    #         )
+    #     )
+    # )
+    cg.add(var.set_code(config[CONF_CODE]))
 
 # RC Switch Raw
 RC_SWITCH_TIMING_SCHEMA = cv.All([cv.uint8_t], cv.Length(min=2, max=2))
