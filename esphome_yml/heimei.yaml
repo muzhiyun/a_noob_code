@@ -1,0 +1,169 @@
+esphome:
+  name: heimei
+
+esp8266:
+  board: esp01_1m
+
+wifi:
+  reboot_timeout: 0s
+  #fast_connect: true
+  networks:
+  - ssid: "H3C_70FB73"
+    password: "11111111"
+  - ssid: "Danke61983"
+    password: "wifi.danke.life"
+  - ssid: "TP-LINK_AFC7"
+    password: "password11"
+  - ssid: "OpenWrt_2.4"
+    password: "Qq2017.."
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Muzhi Fallback Hotspot"
+    password: "Qq2017.."
+
+captive_portal:
+#强制门户认证
+
+web_server:
+  port: 80
+  
+# Enable logging
+logger:
+  level: DEBUG
+  # logs:
+  #   mqtt.component: INFO
+  #   mqtt.client: INFO
+
+# Enable Home Assistant API
+api:
+  password: "Qq2017.."
+
+ota:
+  password: "Qq2017.."
+
+  
+remote_receiver:
+  id: rcvr
+  pin: 
+    number: GPIO5
+    inverted: True
+  #dump: all
+  dump: tcl112
+
+remote_transmitter:
+  pin:  
+    number: GPIO14
+    #inverted: True  #禁止设置 会烧电阻
+    #supports_cool: True
+  carrier_duty_percent: 50%
+
+time:
+  - platform: sntp
+    timezone: UTC-8 #Africa/Dakar #Asia/Hong_Kong
+    servers: ntp1.aliyun.com
+    id: sntp_time
+#    on_time:
+#       - seconds: 15,20,25,30,35,40,45,50
+#         then:
+#           - switch.toggle: my_switch_off
+          
+# sensor:
+#   - platform: dht
+#     pin: D7
+#     temperature:
+#       id: dht11_temp
+#       name: "Living Room Temperature"
+#     humidity:
+#       id: dht11_humi
+#       name: "Living Room Humidity"
+#     update_interval: 60s
+#     model: DHT11
+
+text_sensor:
+
+  - platform: version
+    name: "ESPHome Version"
+    
+
+  - platform: wifi_info
+    ip_address:
+      name: ESP IP Address
+    ssid:
+      name: ESP Connected SSID
+    bssid:
+      name: ESP Connected BSSID
+    mac_address:
+      name: ESP Mac Wifi Address
+    # scan_results:
+    #   name: ESP Latest Scan Results
+      
+  - platform: template
+    name: "Current time"
+    lambda: |-
+      char str[17];
+      auto currTime = id(sntp_time).now();
+      currTime.strftime(str, sizeof(str), "%Y-%m-%d %H:%M");
+      return { str };
+      
+    # strftime(str, sizeof(str), "%Y-%m-%d %H:%M");, to_c_tm(id(sntp_time).now()));
+    # lambda: |-
+    #   char str[17];
+    #   time_t currTime = id(homeassistant_time).now().time;
+    #   strftime(str, sizeof(str), "%Y-%m-%d %H:%M", localtime(&currTime));
+    #   return { str };
+    update_interval: 60s
+    
+#     on_time:
+#       - seconds: 0
+#         minutes: 20
+#         hours: 20
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_open_20
+          
+#       - seconds: 0
+#         minutes: 20
+#         hours: 8
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_off
+          
+#       - seconds: 0
+#         minutes: 30
+#         hours: 21
+#         days_of_week: MON-FRI
+#         #then:
+#         #  - switch.toggle: my_switch_open_25
+
+
+switch:
+  - platform: restart
+    name: "Restart"
+
+  - platform: shutdown
+    name: "Shutdown" 
+    
+  - platform: template
+    name: tcl112_onekey_27
+    id: tcl112_onekey_27
+    turn_on_action:
+      - remote_transmitter.transmit_tcl112:
+          code: [0x23,0xCB,0x26,0x01,0x00,0x24,0x03,0x04,0x01,0x00,0x00,0x00,0x80,0xC1]
+    
+
+  
+
+  
+climate:
+- platform: tcl112
+  name: "AC66"
+  receiver_id: rcvr
+  #sensor: dht11_temp
+
+
+
+
+
+
+

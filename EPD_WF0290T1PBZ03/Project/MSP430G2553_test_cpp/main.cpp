@@ -58,7 +58,7 @@ int main( void )
     uart_send_str("e-Paper show pic\r\n");
     epd.Display(IMAGE_DATA);
 
-    delay_ms(1000);
+    delay_ms(5000);
 
     uart_send_str("e-Paper clear and sleep\r\n");
     //epd.Clear();

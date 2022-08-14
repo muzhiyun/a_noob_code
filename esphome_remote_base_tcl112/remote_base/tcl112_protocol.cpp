@@ -114,7 +114,7 @@ optional<TCL112Data> TCL112Protocol::decode(RemoteReceiveData src) {
 }
 
 void TCL112Protocol::dump(const TCL112Data &data) {
-  ESP_LOGD(TCL112_TAG, "Received TCL112: %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X %02X %02X   %02X %02X",
+  ESP_LOGD(TCL112_TAG, "Received TCL112: 0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X",
             data.remote_state[0],  data.remote_state[1],  data.remote_state[2],  data.remote_state[3],  data.remote_state[4],  data.remote_state[5],
             data.remote_state[6],  data.remote_state[7],  data.remote_state[8],  data.remote_state[9],  data.remote_state[10],  data.remote_state[11],
             data.remote_state[12],  data.remote_state[13]);

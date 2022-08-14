@@ -27,42 +27,89 @@ logger:
 
 # Enable Home Assistant API
 api:
+  reboot_timeout: 0s
   password: "Qq2017.."
 
 ota:
   password: "Qq2017.."
+  
+remote_transmitter:
+  pin:  
+    number: GPIO0
+    inverted: True  #禁止设置 会烧电阻
+    #supports_cool: True
+  carrier_duty_percent: 50%
 
 light:
   - platform: binary
-    name: "Desk Lamp O2"
+    name: "Status_led"
     restore_mode: ALWAYS_OFF
     output: light_output_2
+    
   - platform: binary
-    name: "Desk Lamp O0"
-    restore_mode: ALWAYS_OFF
-    output: light_output_0
-  - platform: binary
-    name: "Desk Lamp O5"
-    output: light_output_5
-  - platform: binary
-    name: "Desk Lamp O10"
+    name: "Relay"
     id: desk_lamp_o10
 #    restore_mode: ALWAYS_ON
     restore_mode: RESTORE_DEFAULT_ON
     output: light_output_10
 
 
-# switch:
-#   - platform: gpio
-#     pin: GPIO10
-#     restore_mode: ALWAYS_ON
-#     name: "room_Light"
+switch:
+  - platform: restart
+    name: "Restart"
 
+  - platform: shutdown
+    name: "Shutdown" 
+    
+  - platform: template
+    name: onekey_sleep_27
+    id: onekey_sleep_27
+    turn_on_action:
+      - remote_transmitter.transmit_tcl112:
+          code: [0x23,0xCB,0x26,0x01,0x00,0x24,0x03,0x04,0x01,0x00,0x00,0x00,0x80,0xC1]
+
+  - platform: template
+    name: onekey_power_16
+    id: onekey_power_16
+    turn_on_action:
+      - remote_transmitter.transmit_tcl112:
+          code: [0x23,0xCB,0x26,0x01,0x00,0x24,0x43,0x0F,0x05,0x00,0x00,0x00,0x80,0x10]
+
+text_sensor:
+
+  - platform: version
+    name: "ESPHome Version"
+    
+
+  - platform: wifi_info
+    ip_address:
+      name: ESP IP Address
+    ssid:
+      name: ESP Connected SSID
+    bssid:
+      name: ESP Connected BSSID
+    mac_address:
+      name: ESP Mac Wifi Address
+
+      
+  - platform: template
+    name: "Current time"
+    lambda: |-
+      char str[17];
+      auto currTime = id(sntp_time).now();
+      currTime.strftime(str, sizeof(str), "%Y-%m-%d %H:%M");
+      return { str };
+    update_interval: 60s
 
 time:
-  - platform: homeassistant
-    id: homeassistant_time
-    timezone: Asia/Hong_Kong
+  - platform: sntp
+    timezone: UTC-8 #Africa/Dakar #Asia/Hong_Kong
+    servers: ntp1.aliyun.com
+    id: sntp_time
+# time:
+#   - platform: homeassistant
+#     id: homeassistant_time
+#     timezone: Asia/Hong_Kong
     on_time:
       - seconds: 0
         minutes: 10                                              
@@ -71,21 +118,32 @@ time:
         then:
           - light.turn_off: 
               id: desk_lamp_o10
-
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: GPIO5
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "Button"
+    device_class: window
 
 output:
   - id: light_output_2
     platform: gpio
     inverted: True
     pin: GPIO2
-  - id: light_output_0
-    platform: gpio
-    inverted: True
-    pin: GPIO0
-  - id: light_output_5
-    platform: gpio
-    pin: GPIO5
   - id: light_output_10
     platform: gpio
     #inverted: True
     pin: GPIO10
+
+
+
+
+climate:
+- platform: tcl112
+  name: "AC82"
+  #receiver_id: rcvr    
+
