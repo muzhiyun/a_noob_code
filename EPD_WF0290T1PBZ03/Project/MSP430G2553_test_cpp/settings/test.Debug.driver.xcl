@@ -10,8 +10,6 @@
 
 "fet" 
 
-"--verify_all" 
-
 "--erase_main" 
 
 "--derivative" 
@@ -34,7 +32,7 @@
 
 "ti_usb" 
 
-"--use_emulated_breakpoints" 
+"--use_virtual_breakpoints" 
 
 "--settlingtime=0" 
 

@@ -5,8 +5,15 @@
 #include "epdpaint.h"
 #include "imagedata.h"
 #include "uart.h"
+#include "a7105.h"
+#include "flash.h"
+#include "fonts.h"
+#include "epdpaint.h"
 
 Epd epd;
+
+#define COLORED     0
+#define UNCOLORED   1
 
 void delay_ms(int count)
 {
@@ -41,7 +48,7 @@ int main( void )
     uart_send_str("test_cpp a7105 communication \r\n");
     delay_ms(1000);
     uart_send_str(__DATE__);
-    //uart_send_str(" \r\n");
+    uart_send_str(" \r\n");
      delay_ms(1000);
     uart_send_str(__TIME__);
     uart_send_str("\r\n");
@@ -54,9 +61,9 @@ int main( void )
     delay_ms(1000);
     uart_send_str("e-Paper clear\r\n");
     epd.Clear();
-
+    delay_ms(14000);
     uart_send_str("e-Paper show pic\r\n");
-    epd.Display(IMAGE_DATA);
+    epd.Display(IMAGE_DATA,1);
 
     delay_ms(5000);
 

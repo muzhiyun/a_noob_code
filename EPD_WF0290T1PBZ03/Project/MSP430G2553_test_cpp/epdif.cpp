@@ -110,7 +110,7 @@ int EpdIf::IfInit(void) {
   P3SEL2 = 0X0; 
 
 
-  DelayMs(1000);
+  DelayMs(100);
   
    
     return 0;

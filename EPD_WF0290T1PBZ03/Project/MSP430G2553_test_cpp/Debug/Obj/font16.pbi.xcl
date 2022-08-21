@@ -1,5 +1,5 @@
 "E:\归档备用\wpa2\电子维修\430墨水屏\test_cpp\font16.cpp"
--std=c99
+-std=c++98
 -ferror-limit=0
 -fbracket-depth=512
 -I
@@ -8,6 +8,8 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib
 D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc
 -I
 D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib\c
+-I
+D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib\ecpp
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0
@@ -206,7 +208,7 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib\c
 -D__MULTIPLIER_16__=1
 -D__MULTIPLIER_32__=3
 -D__MULTIPLIER_NONE__=0
--D__MULTIPLIER__=__MULTIPLIER_16__
+-D__MULTIPLIER__=__MULTIPLIER_NONE__
 -D__REGISTER_FREE__=0
 -D__REGISTER_LOCKED__=1
 -D__REGISTER_MODEL_REG16__=0
@@ -219,10 +221,12 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib\c
 -D__HAS_LOCATED_DECLARATION__=1
 -D__IAR_COMPILERBASE__=595715
 -D__STDC__=1
--D__STDC_VERSION__=199901L
--D__STDC_HOSTED__=1
--D__STDC_NO_VLA__=1
--D__STDC_NO_ATOMICS__=1
+-D__cplusplus=199711L
+-D__iar_extended_embedded_cplusplus=1
+-D__embedded_cplusplus=1
+-D__WCHAR_T=1
+-D__BOOL=1
+-D__ARRAY_OPERATORS=1
 -D__EDG_TYPE_TRAITS_ENABLED=1
 -D__EDG__=1
 -D__EDG_VERSION__=410
@@ -245,7 +249,7 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\inc\dlib\c
 -D__EDG_SYSV=0
 -D__EDG_ANSIC=1
 -D__EDG_CPP11_IL_EXTENSIONS_SUPPORTED=1
--D__MSP430F149__=1
+-D__MSP430G2553__=1
 -D_DLIB_CONFIG_FILE_HEADER_NAME="D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\430\lib\dlib\dl430fn.h"
 -D_DLIB_CONFIG_FILE_STRING="D:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\430\\lib\\dlib\\dl430fn.h"
 -D__VERSION__="IAR C/C++ Compiler V7.12.1.987/W32 for MSP430"

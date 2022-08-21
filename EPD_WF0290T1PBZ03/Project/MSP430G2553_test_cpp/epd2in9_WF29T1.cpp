@@ -141,36 +141,43 @@ int Epd::Init(void)
     Reset();
     
 
-    SendCommand(0x01);	//POWER SETTING
-    SendData(0x07);
-    SendData(0x00);
-    SendData(0x0B);
-    SendData(0x00);
+
 
     SendCommand(0x06); //booster soft start
     SendData(0x17);    //A
     SendData(0x17);    //B
     SendData(0x17);    //C
+    SendCommand(0x01);	//POWER SETTING
+    SendData(0x03);
+    SendData(0x00);
+    SendData(0x2B);
+    SendData(0x2B);
+    SendData(0x09);
     SendCommand(0x04); //Power on
-    DelayMs(1000);
+    DelayMs(100);
     WaitUntilIdle();
-    DelayMs(1000);
+    DelayMs(100);
     SendCommand(0x00); // PANEL_SETTING
     SendData(0xBF);
 	
-	SendCommand(0x50);	//PLL setting
-    SendData(0x37);     // 3a 100HZ   29 150Hz 39 200HZ	31 171HZ
+    SendCommand(0x30);	//PLL setting
+    SendData(0x3a);  
+    //SendData(0x39); 
+ 
 
-    SendCommand(0x30);
-    SendData(0x39);
+
 	
-    SendCommand(0x61); // TCON_RESOLUTION
-    SendData(0x80);
-    SendData(0x01);
+    SendCommand(TCON_RESOLUTION); // TCON_RESOLUTION
+    SendData(0x80);            //0x80=128
+    SendData(0x01);            //0x128=296
     SendData(0x28);
 	
     SendCommand(0x82); // VCM_DC_SETTING_REGISTER
-    SendData(0X0E);
+    SendData(0X12);
+    //SendData(0X0E);
+    
+    SendCommand(0x50);	
+    SendData(0x77);    
 
 
     SetFullReg();
@@ -187,13 +194,13 @@ void Epd::Reset(void)
 {
     //DigitalWrite(reset_pin, HIGH);
     epdrsthigh;
-    DelayMs(1000);
+    DelayMs(100);
     //DigitalWrite(reset_pin, LOW);                //module reset
     epdrstlow;
-    DelayMs(1000);
+    DelayMs(100);
     //DigitalWrite(reset_pin, HIGH);
     epdrsthigh;
-    DelayMs(1000);
+    DelayMs(100);
 }
 
 void Epd::Clear(void)
@@ -217,7 +224,10 @@ void Epd::Clear(void)
     // }
 
     SendCommand(0x10);
-    for (uint32_t i = 0; i < 9472; i++)
+    //for (uint32_t i = 0; i < 9472; i++)
+    //(EPD_WIDTH * EPD_HEIGHT / 8)
+    //4736
+    for (uint32_t i = 0; i < 9472 ; i++)
     {
         SendData(0xFF);
     }
@@ -226,19 +236,20 @@ void Epd::Clear(void)
     TurnOnDisplay();
 }
 
-void Epd::Display(const unsigned char *frame_buffer)
+void Epd::Display(const unsigned char *frame_buffer,int flag)
 {
-    int w = (EPD_WIDTH % 8 == 0)? (EPD_WIDTH / 8 ): (EPD_WIDTH / 8 + 1);
-    int h = EPD_HEIGHT;
-
-     SendCommand(0x10);
-     for (int j = 0; j < h; j++) {
-         for (int i = 0; i < w; i++) {
-             SendData(0x00);
-         }
-     }
+    
+     if(flag ==0){      //2bbp sizeof(imagedata)=9472
+       int w = (EPD_WIDTH % 4 == 0)? (EPD_WIDTH / 4 ): (EPD_WIDTH / 4 + 1);
+       int h = EPD_HEIGHT;
+       SendCommand(DATA_START_TRANSMISSION_1);
+       SendCommand(0x10);
+       for (int j = 0; j < h*w; j++) {
+               SendData(frame_buffer[j]);
+       }
+     }else{             //1bbp sizeof(imagedata)=4736
     // // Dev_Delay_ms(10);
-    DelayMs(1000);
+    //DelayMs(1000);
     // SendCommand(0x13);
     // for (int j = 0; j < h; j++) {
     //     for (int i = 0; i < w; i++) {
@@ -246,35 +257,37 @@ void Epd::Display(const unsigned char *frame_buffer)
     //     }
     // }
     // // Dev_Delay_ms(10);
-
+    int w = (EPD_WIDTH % 8 == 0)? (EPD_WIDTH / 8 ): (EPD_WIDTH / 8 + 1);
+    int h = EPD_HEIGHT;
     SendCommand(0x10);
     unsigned char temp1,temp2,temp3;	
-for (int j = 0; j < h; j++) 
+    for (int j = 0; j < h; j++) 
         for (int i = 0; i < w; i++) {
-        temp2=0;
-	temp3=0;
-        temp1 = (frame_buffer[i + j * w]);
+            temp2=0;
+            temp3=0;
+            temp1 = (frame_buffer[i + j * w]);
 
-						if(temp1&1)
-							temp2 += 0x03;
-						if(temp1&2)
-							temp2 += 0x0c;
-						if(temp1&4)
-							temp2 += 0x30;
-						if(temp1&8)
-							temp2 += 0xc0;
-						
-						if(temp1&0x10)
-							temp3 += 0x03;
-						if(temp1&0x20)
-							temp3 += 0x0c;
-						if(temp1&0x40)
-							temp3 += 0x30;
-						if(temp1&0x80)
-							temp3 += 0xc0;
+            if(temp1&1)
+                    temp2 += 0x03;
+            if(temp1&2)
+                    temp2 += 0x0c;
+            if(temp1&4)
+                    temp2 += 0x30;
+            if(temp1&8)
+                    temp2 += 0xc0;
+            
+            if(temp1&0x10)
+                    temp3 += 0x03;
+            if(temp1&0x20)
+                    temp3 += 0x0c;
+            if(temp1&0x40)
+                    temp3 += 0x30;
+            if(temp1&0x80)
+                    temp3 += 0xc0;
 
-	SendData(temp3);
-        SendData(temp2);
+            SendData(temp3);
+            SendData(temp2);
+        }
     }
 
     // SetFullReg();
@@ -292,7 +305,7 @@ for (int j = 0; j < h; j++)
 void Epd::Sleep()
 {
     SendCommand(0x50);
-    SendData(0x37);
+    SendData(0x77);
     SendCommand(0x02);
 }
 

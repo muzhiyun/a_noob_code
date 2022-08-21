@@ -2154,6 +2154,9 @@
         </settings>
     </configuration>
     <file>
+        <name>$PROJ_DIR$\a7105.c</name>
+    </file>
+    <file>
         <name>$PROJ_DIR$\epd2in9_WF29T1.cpp</name>
     </file>
     <file>
