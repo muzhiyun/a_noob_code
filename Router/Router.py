@@ -5,40 +5,78 @@ import urllib.parse
 import json
 import time
 import os
+import sqlite3
 
 
 url="http://192.168.2.254/stok=Changeme/ds"
 headers={'Content-Type':'application/json; charset=UTF-8'}
-data={"error_code": -1}
+data={"error_code":-1}
+conn = sqlite3.connect('test.db')
+sqlite_cursor = conn.cursor()
+LastWarning = False
+IsWarning = False
+
+
+def db_creat():
+    global sqlite_cursor,conn
+    sqlite_cursor.execute('''CREATE TABLE IF NOT EXISTS Router 
+    (ID       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    TIME     TEXT,
+    MAC      TEXT,
+    TYPE     TEXT,
+    IP       TEXT,
+    HOSTNAME TEXT
+    );''')
+    conn.commit()
+
+def db_read():
+    global sqlite_cursor,conn,LastWarning
+    cursor = sqlite_cursor.execute('''SELECT MAX(ID),
+       TIME,
+       MAC,
+       TYPE FROM Router;''')
+    cow = cursor.fetchone()
+    if(cow[3] != None):
+        print("%s  eventid:%d,%s %s" %(cow[1],cow[0],cow[2],cow[3]))
+        LastWarning = (cow[3].lower() == "up")
+        print("LastStatus:",cow[3].lower()," LastWarning:",LastWarning)
+    conn.commit()
+
 
 def login():
-    global url
+    global url,sqlite_cursor,conn,data
     login_url="http://192.168.2.254/"
-    param="{\"method\":\"do\",\"login\":{\"password\":\"r9B8lg4U3wefbwK\"}}"
+    param={"method":"do","login":{"password":"r9B8lg4U3wefbwK"}}
 
-    #data = urllib.parse.urlencode(param)
-    data = param.encode('utf-8') # data should be bytes
-
-    # need Request to pass headers
-    req = urllib.request.Request(login_url, data, headers)
-    resp =urllib.request.urlopen(req)
-    strstr=resp.read().decode("utf-8")
-    print(strstr)
-    #print(resp.getheaders())
-
+    #param = urllib.parse.urlencode(param)
+    postdata = json.dumps(param).encode('utf-8') # data should be bytes
+    try:
+        # need Request to pass headers
+        print(type(data))
+        req = urllib.request.Request(login_url, postdata, headers)
+        resp =urllib.request.urlopen(req)
+        strstr=resp.read().decode("utf-8")
+        print(strstr)
+        data=json.loads(strstr)
+        #print(resp.getheaders())
+    except urllib.error.URLError as e:
     #print(len(strstr))
-    data=json.loads(strstr)
-    if(data["error_code"]==0):
-        url="http://192.168.2.254/stok="+data["stok"]+"/ds"
-    else:
-        print("Login fail")
-        exit
+        print("Login fail: ",e.reason)
+        data["error_code"] = str(data["error_code"])+" "+ e.reason
+    finally:
+        if(data["error_code"]==0):
+            url="http://192.168.2.254/stok="+data["stok"]+"/ds"
+        else:
+            sqlite_cursor.execute("INSERT INTO Router (IP,TYPE,MAC,TIME,HOSTNAME) VALUES ('0.0.0.0','Login Fail','00-00-00-00','"+time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))+"','"+str(data["error_code"])+"');")
+            conn.commit()
+            conn.close()
+            exit()
 
 def get_info():
     global url,data
-    param="{\"hyfi\":{\"table\":[\"connected_ext\"]},\"hosts_info\":{\"table\":\"host_info\",\"name\":\"cap_host_num\"},\"method\":\"get\"}"
+    param={"hyfi":{"table":["connected_ext"]},"hosts_info":{"table":"host_info","name":"cap_host_num"},"method":"get"}
     print("url:",url)
-    data = param.encode('utf-8') # data should be bytes
+    data = json.dumps(param).encode('utf-8') # data should be bytes
     req = urllib.request.Request(url, data, headers)
     resp =urllib.request.urlopen(req)
     strstr=resp.read().decode("utf-8")
@@ -47,7 +85,8 @@ def get_info():
     data=json.loads(strstr)
 
 def print_info():
-    global data
+    global data,sqlite_cursor,conn,IsWarning
+    IsWarning = False
     device_num = data["hosts_info"]["cap_host_num"]["host_num"]
     print("device_num:",device_num)
     i=0
@@ -56,20 +95,30 @@ def print_info():
     while(i<device_num):
         host_info_temp=data["hosts_info"]["host_info"][i]["host_info_"+str(i)] 
         if(host_info_temp["mac"]=="72-1f-51-74-aa-6a"):
+            IsWarning = True
             print("Keep Warning!")
+            if(not LastWarning):
+                print("Start Warning!")
+                sqlite_cursor.execute("INSERT INTO Router (IP,TYPE,MAC,TIME,HOSTNAME) VALUES ('"+host_info_temp["ip"]+"','up','"+host_info_temp["mac"]+"','"+time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))+"','"+urllib.parse.unquote(host_info_temp["hostname"])+"');")
+                conn.commit()
         info= ("%s %15s  %s   %6s %6s %s " %(host_info_temp["mac"]  , host_info_temp["ip"] ,host_info_temp["wifi_mode"],host_info_temp["up_speed"]  , host_info_temp["down_speed"],urllib.parse.unquote(host_info_temp["hostname"])))
         print(info)
         i=i+1
+    if(not IsWarning and LastWarning):
+        print("Start Safe!")
+        sqlite_cursor.execute("INSERT INTO Router (IP,TYPE,MAC,TIME) VALUES ('0.0.0.0','down','72-1f-51-74-aa-6a','"+time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))+"');")
+        conn.commit()
 
 
 
-
+db_creat()
 while(True):
     if(data["error_code"]!=0):
         login()
     get_info()
+    db_read()
     print_info()
-    time.sleep(5)
+    time.sleep(55)
     if os.name == 'nt':  # 对于Windows系统
         os.system('cls')
     else:  # 对于Linux/Mac等系统
