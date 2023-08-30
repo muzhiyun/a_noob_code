@@ -11,7 +11,7 @@ import sqlite3
 url="http://192.168.2.254/stok=Changeme/ds"
 headers={'Content-Type':'application/json; charset=UTF-8'}
 data={"error_code":-1}
-conn = sqlite3.connect('test.db')
+conn = sqlite3.connect('/srv/dev-disk-by-label-NAS/Share/test.db')
 sqlite_cursor = conn.cursor()
 LastWarning = False
 IsWarning = False
@@ -61,8 +61,9 @@ def login():
         #print(resp.getheaders())
     except urllib.error.URLError as e:
     #print(len(strstr))
-        print("Login fail: ",e.reason)
+        print("login fail: ",e.reason)
         data["error_code"] = str(data["error_code"])+" "+ e.reason
+        data={"error_code":-1}
     finally:
         if(data["error_code"]==0):
             url="http://192.168.2.254/stok="+data["stok"]+"/ds"
@@ -76,13 +77,20 @@ def get_info():
     global url,data
     param={"hyfi":{"table":["connected_ext"]},"hosts_info":{"table":"host_info","name":"cap_host_num"},"method":"get"}
     print("url:",url)
-    data = json.dumps(param).encode('utf-8') # data should be bytes
-    req = urllib.request.Request(url, data, headers)
-    resp =urllib.request.urlopen(req)
-    strstr=resp.read().decode("utf-8")
-    #print(strstr)
-    #print(resp.getheaders())
-    data=json.loads(strstr)
+    postdata = json.dumps(param).encode('utf-8') # data should be bytes
+    try:
+        req = urllib.request.Request(url, postdata, headers)
+        resp =urllib.request.urlopen(req)
+        strstr=resp.read().decode("utf-8")
+        #print(strstr)
+        #print(resp.getheaders())
+        data=json.loads(strstr)
+        return True
+    except (urllib.error.HTTPError,urllib.error.URLError) as e:
+    #print(len(strstr))
+        print("get_info fail: ",e.reason)
+        data={"error_code":-1}
+        return False
 
 def print_info():
     global data,sqlite_cursor,conn,IsWarning
@@ -115,9 +123,9 @@ db_creat()
 while(True):
     if(data["error_code"]!=0):
         login()
-    get_info()
-    db_read()
-    print_info()
+    if(get_info()):
+        db_read()
+        print_info()
     time.sleep(55)
     if os.name == 'nt':  # 对于Windows系统
         os.system('cls')
