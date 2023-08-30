@@ -103,7 +103,9 @@ Adafruit
 
 ### 相关tool
 [灰度测试](http://www.lagom.nl/lcd-test/zhs_gradient.php)
+
 https://tools.clz.me/image-to-bitmap-array
+
 https://www.e-paper-display.cn/project/iisstart.htm
 
 
