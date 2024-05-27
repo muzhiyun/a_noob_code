@@ -82,7 +82,8 @@
 
         productItems.forEach(item => {
             const productCode = item.querySelector('a').innerText;
-            const vendor = item.querySelector('.cart-li-pro-info .ellipsis:last-child').innerText.trim();
+            //const vendor = item.querySelector('.cart-li-pro-info .ellipsis:last-child').innerText.trim();
+            const vendor = item.querySelector('.cart-li-pro-info .ellipsis:nth-child(3)').innerText.trim();
             const warehouseElement = item.querySelector('.warehouse');
             const warehouse = warehouseElement ? warehouseElement.childNodes[0].nodeValue.trim() : '未知仓库';
             const totalPriceText = item.querySelector('.line-total-price').innerText;
@@ -106,6 +107,12 @@
             // 累加所有厂商的总价
             overallTotalPrice += totalPrice;
         });
+
+         // 删除现有的浮动表格
+        const existingFloatingTable = document.getElementById('floatingTable');
+        if (existingFloatingTable) {
+            existingFloatingTable.remove();
+        }
 
         // 创建悬浮表格
         const floatingTable = createFloatingTable();
@@ -159,7 +166,7 @@
             cartMenuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
             cartMenuCommandIds = [];
 
-            cartMenuCommandIds.push(GM_registerMenuCommand(`设置门槛 (当前: ${premiumBase})`, () => {
+            cartMenuCommandIds.push(GM_registerMenuCommand(`设置满多少 (当前: ${premiumBase})`, () => {
                 const newPremiumBase = prompt('请输入新的门槛:', premiumBase);
                 if (newPremiumBase !== null) {
                     premiumBase = parseInt(newPremiumBase, 10);
@@ -169,7 +176,7 @@
                 }
             }));
 
-            cartMenuCommandIds.push(GM_registerMenuCommand(`设置抵扣值 (当前: ${freeAmount})`, () => {
+            cartMenuCommandIds.push(GM_registerMenuCommand(`设置减多少 (当前: ${freeAmount})`, () => {
                 const newfreeAmount = prompt('请输入新的抵扣值:', freeAmount);
                 if (newfreeAmount !== null) {
                     freeAmount = parseInt(newfreeAmount, 10);
@@ -230,7 +237,17 @@
 
         // 遍历每个coupon-item元素
         couponItems.forEach(item => {
-            const condition = parseInt(item.querySelector('.condition').textContent.trim().replace('满', '').replace('可用', ''));
+            let conditionElement = item.querySelector('.condition');
+            if (!conditionElement) {
+                //console.log('已使用的券 item:', item);
+                conditionElement = item.querySelector('.condition-disable');
+            }
+            if (!conditionElement) {
+                console.log('Error: condition element not found for item:', item);
+                return; // 如果仍找不到.condition元素，直接跳过这个item并报错
+            }
+
+            const condition = conditionElement.textContent.trim().replace('满', '').replace('可用', '');
             const moneyElement = item.querySelector('.money');
             let money = condition; // 默认设置为condition，以防止空指针异常
             if (moneyElement) {
@@ -330,6 +347,7 @@
     // 创建悬浮表格容器
     function createFloatingTable() {
         const div = document.createElement('div');
+        div.id = 'floatingTable'; // 添加一个唯一的ID以便识别和删除
         div.style.position = 'fixed';
         div.style.top = '50px';
         div.style.right = '10px';
