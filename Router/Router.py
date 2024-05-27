@@ -86,7 +86,7 @@ def get_info():
         #print(resp.getheaders())
         data=json.loads(strstr)
         return True
-    except (urllib.error.HTTPError,urllib.error.URLError) as e:
+    except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError) as e:
     #print(len(strstr))
         print("get_info fail: ",e.reason)
         data={"error_code":-1}
