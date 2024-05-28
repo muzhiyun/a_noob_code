@@ -247,7 +247,7 @@
                 return; // 如果仍找不到.condition元素，直接跳过这个item并报错
             }
 
-            const condition = conditionElement.textContent.trim().replace('满', '').replace('可用', '');
+            const condition = parseInt(conditionElement.textContent.trim().replace('满', '').replace('可用', ''));
             const moneyElement = item.querySelector('.money');
             let money = condition; // 默认设置为condition，以防止空指针异常
             if (moneyElement) {
