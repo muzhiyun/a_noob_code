@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         立创助手
 // @namespace    http://tampermonkey.net/
-// @version      1.18
+// @version      1.21
 // @description  None
 // @author       Your Name
 // @match        https://cart.szlcsc.com/cart/display.html*
 // @match        https://www.szlcsc.com/huodong.html*
+// @match        https://so.szlcsc.com/global.html*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
@@ -29,6 +30,8 @@
         setInterval(handleCartPage, 3000); // 每隔3秒重新生成一次悬浮表格
     } else if (currentUrl.includes('www.szlcsc.com/huodong.html')) {
         handleCouponPage();
+    } else if (currentUrl.includes('so.szlcsc.com/global.html')) {
+        handleSearchPage();
     }
 
 /*     function debounce(func, wait) {
@@ -58,6 +61,99 @@
 
         targetNodes.forEach(node => observer.observe(node, config));
     } */
+
+    function handleSearchPage() {
+        // 预置的厂商名列表
+        const Brands = ['UMW(友台半导体)', '其他厂商名'];
+
+        // 预设的厂商列表
+        var presetManufacturers = ['SAMTEC', 'Preci-Dip', 'Mill-Max Mfg. Corp.', 'TE Connectivity', 'Sullins', 'Amphenol', '3M', 'MOLEX', 'XKB Connection(中国星坤)', 'GCT'];
+
+        // 定义点击确认按钮的函数
+        function clickConfirmButton() {
+            var confirmButton = document.querySelector('input[type="button"][value="确定"]'); // 获取确认按钮元素
+            if (confirmButton) {
+                confirmButton.click(); // 点击确认按钮
+            }
+        }
+
+        // 提取厂商名的函数
+        function extractManufacturerName(label) {
+            var manufacturerName = label.getAttribute('title'); // 获取厂商名
+
+            // 如果厂商名包含括号，则提取括号内的内容作为厂商名
+            if (manufacturerName.includes('(') && manufacturerName.includes(')')) {
+                manufacturerName = manufacturerName.match(/\(([^)]+)\)/)[1];
+            }
+
+            return manufacturerName;
+        }
+
+        // 等待页面加载完成后执行选择操作和点击确认按钮
+        window.addEventListener('load', function() {
+            var button = document.getElementById('more-brand'); // 获取按钮元素
+
+            if (button) {
+                button.click(); // 点击多选按钮
+            }
+            var checkboxes = document.querySelectorAll('input[type="checkbox"].fuxuanku'); // 获取所有复选框元素
+
+            checkboxes.forEach(function(checkbox) {
+                var label = checkbox.nextElementSibling; // 获取复选框相邻的label元素
+                var manufacturerName = extractManufacturerName(label);
+
+                if (presetManufacturers.includes(manufacturerName)) {
+                    checkbox.checked = true; // 如果厂商名在预设列表中，则选中该复选框
+                }
+            });
+
+            clickConfirmButton(); // 点击确认按钮
+        });
+        /*
+        // 获取所有的表格
+        const tables = document.querySelectorAll('table');
+
+        let foundAnyBrand = false;
+
+        // 遍历每个表格
+        tables.forEach(table => {
+            // 获取当前表格内包含厂商名的元素
+            const brandNameElements = table.querySelectorAll('.brand-name');
+
+            // 遍历当前表格内的厂商名元素
+            brandNameElements.forEach(element => {
+                const brandName = element.innerText.trim();
+                console.log("检测到" + brandName);
+
+                // 判断提取出的厂商名是否在预置列表中
+                if (!Brands.includes(brandName)) {
+                    // 如果不在预置列表中，则移除该表格
+                    table.remove();
+                } else {
+                    foundAnyBrand = true;
+                }
+            });
+        });
+
+        // 如果没有找到任何厂商名，随机延迟3-5秒后自动翻页
+        if (!foundAnyBrand) {
+            const randomWaitTime = Math.floor(Math.random() * 3000) + 3000; // 3-5秒
+            setTimeout(() => {
+                // 点击下一页按钮
+                const nextPageButton = document.querySelector('.next');
+                if (nextPageButton) {
+                    nextPageButton.click();
+                    // 设置定时任务，在2秒后再次执行handleSearchPage函数
+                    setTimeout(() => {
+                        handleSearchPage();
+                    }, 2000);
+                }
+            }, randomWaitTime);
+        }
+        */
+    }
+
+
 
     function handleCartPage() {
         console.log('处理购物车页面');
@@ -209,7 +305,8 @@
 
         // 创建菜单项
         updateCouponMenu();
-
+        // 用于存储满足要求的厂商名
+        let validManufacturers = [];
         // 获取所有coupon-item元素
         const couponItems = document.querySelectorAll('.coupon-item');
 
@@ -258,23 +355,23 @@
             }
             const couponName = item.querySelector('.coupon-item-name h3').textContent.trim();
 
-            // 判断差值是否在阈值以内
-            if (Math.abs(money - condition) > threshold) {
+            // 判断差值是否在阈值以内和是否置灰新人专享
+            if ((Math.abs(money - condition) > threshold) || (disableNewUserCoupons && couponName.includes('<新人专享>'))) {
                 if (deleteInvalidElements) {
                     item.remove(); // 删除不符合条件的元素
                 } else {
                     disableElement(item);
+                }
+            } else {
+                let couponNameElement = item.querySelector('.coupon-item.receive .coupon-item-name h3');
+                if(couponNameElement){
+                    couponNameElement = couponNameElement.textContent.trim();
+                    //console.log('couponNameElement:', couponNameElement);
+                    let manufacturer = couponNameElement.replace(/^\d+元/, '').replace(/品牌优惠$/, ''); // 裁剪提取厂商名
+                    validManufacturers.push(manufacturer);
                 }
             }
 
-            // 判断是否置灰新人专享
-            if (disableNewUserCoupons && couponName.includes('<新人专享>')) {
-                if (deleteInvalidElements) {
-                    item.remove(); // 删除不符合条件的元素
-                } else {
-                    disableElement(item);
-                }
-            }
 
             // 处理仅浏览模式
             if (browseOnly) {
@@ -292,7 +389,41 @@
                     item.querySelector('.coupon-item-con').appendChild(newBtn);
                 }
             }
+
         });
+
+          // 删除现有的浮动表格
+        const existingFloatingTable = document.getElementById('floatingTable');
+        if (existingFloatingTable) {
+            existingFloatingTable.remove();
+        }
+
+        // 创建悬浮表格
+        const floatingTable = createFloatingTable();
+        const table = createTable();
+
+        // 添加表头
+        const headerRow = createRow(['序号', '厂商'], true);
+        table.appendChild(headerRow);
+        /*// 打印符合要求的厂商
+        validManufacturers.forEach((manufacturer, index) => {
+            const row = createRow([manufacturer]);
+            row.insertBefore(document.createElement('td'), row.firstChild).innerText = index + 1;
+            table.appendChild(row);
+        });*/
+
+        // 将所有符合要求的厂商名拼接为一个长字符串,只用一行表格展示
+        const allManufacturers = validManufacturers.join(';');
+
+        // 创建新行
+        const newRow = createRow([allManufacturers]);
+        newRow.insertBefore(document.createElement('td'), newRow.firstChild).innerText = validManufacturers.length;
+
+        // 将新行添加到表格中
+        table.appendChild(newRow);
+
+        floatingTable.appendChild(table);
+        document.body.appendChild(floatingTable);
 
         // 禁用元素的函数
         function disableElement(item) {
