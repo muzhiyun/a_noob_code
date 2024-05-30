@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         立创助手
 // @namespace    http://tampermonkey.net/
-// @version      1.21
+// @version      1.22
 // @description  None
 // @author       Your Name
 // @match        https://cart.szlcsc.com/cart/display.html*
@@ -63,52 +63,86 @@
     } */
 
     function handleSearchPage() {
-        // 预置的厂商名列表
-        const Brands = ['UMW(友台半导体)', '其他厂商名'];
-
+        console.log('处理搜索页面');
         // 预设的厂商列表
-        var presetManufacturers = ['SAMTEC', 'Preci-Dip', 'Mill-Max Mfg. Corp.', 'TE Connectivity', 'Sullins', 'Amphenol', '3M', 'MOLEX', 'XKB Connection(中国星坤)', 'GCT'];
+        var presetManufacturers = [];
+        var notfoundManufacturers = [];
 
-        // 定义点击确认按钮的函数
-        function clickConfirmButton() {
-            var confirmButton = document.querySelector('input[type="button"][value="确定"]'); // 获取确认按钮元素
-            if (confirmButton) {
-                confirmButton.click(); // 点击确认按钮
-            }
-        }
-
-        // 提取厂商名的函数
-        function extractManufacturerName(label) {
-            var manufacturerName = label.getAttribute('title'); // 获取厂商名
-
-            // 如果厂商名包含括号，则提取括号内的内容作为厂商名
-            if (manufacturerName.includes('(') && manufacturerName.includes(')')) {
-                manufacturerName = manufacturerName.match(/\(([^)]+)\)/)[1];
-            }
-
-            return manufacturerName;
-        }
-
-        // 等待页面加载完成后执行选择操作和点击确认按钮
-        window.addEventListener('load', function() {
-            var button = document.getElementById('more-brand'); // 获取按钮元素
-
-            if (button) {
-                button.click(); // 点击多选按钮
-            }
-            var checkboxes = document.querySelectorAll('input[type="checkbox"].fuxuanku'); // 获取所有复选框元素
-
-            checkboxes.forEach(function(checkbox) {
-                var label = checkbox.nextElementSibling; // 获取复选框相邻的label元素
-                var manufacturerName = extractManufacturerName(label);
-
-                if (presetManufacturers.includes(manufacturerName)) {
-                    checkbox.checked = true; // 如果厂商名在预设列表中，则选中该复选框
+        let saveManufacturersForSearch = GM_getValue('saveManufacturersForSearch', false);
+        if(saveManufacturersForSearch) {
+            presetManufacturers = GM_getValue('presetManufacturers', presetManufacturers);
+            if(presetManufacturers.length > 0) {
+                console.log("saveManufacturersForSearch已启用，厂商读取：",presetManufacturers);
+                // 定义点击确认按钮的函数
+                function clickConfirmButton() {
+                    var confirmButton = document.querySelector('input[type="button"][value="确定"]'); // 获取确认按钮元素
+                    if (confirmButton) {
+                        confirmButton.click(); // 点击确认按钮
+                    }
                 }
-            });
 
-            clickConfirmButton(); // 点击确认按钮
-        });
+                // 提取多选栏中厂商名的函数
+                function extractManufacturerName(label) {
+                    var manufacturerName = label.getAttribute('title'); // 获取厂商名
+
+                    // 如果厂商名包含括号，则提取括号内的内容作为厂商名
+                    if (manufacturerName.includes('(') && manufacturerName.includes(')')) {
+                        manufacturerName = manufacturerName.match(/\(([^)]+)\)/)[1];
+                    }
+
+                    return manufacturerName;
+                }
+
+                // 等待页面加载完成后执行选择操作和点击确认按钮
+                window.addEventListener('load', function() {
+                    var button = document.getElementById('more-brand'); // 获取按钮元素
+                    if (button) {
+                        button.click(); // 点击多选按钮
+
+                        var checkboxes = document.querySelectorAll('input[type="checkbox"].fuxuanku'); // 获取所有复选框元素
+                        var isAnypresetManufacturers = false;
+
+                        checkboxes.forEach(function(checkbox) {
+                            var label = checkbox.nextElementSibling; // 获取复选框相邻的label元素
+                            var manufacturerName = extractManufacturerName(label);
+
+                            if (presetManufacturers.includes(manufacturerName)) {
+                                checkbox.checked = true; // 如果厂商名在预设列表中，则选中该复选框
+                                isAnypresetManufacturers = true;
+                            }
+                        });
+                        if (isAnypresetManufacturers) {
+                            clickConfirmButton(); // 点击确认按钮
+                        } else {
+                            // 创建悬浮表格
+                            const floatingTable = createFloatingTable();
+                            const table = createTable();
+
+                            // 添加表头
+                            const headerRow = createRow(['总数', '未找到任何优惠厂商'], true);
+                            table.appendChild(headerRow);
+                            // 打印符合要求的厂商
+
+                            // 将所有厂商名整理为一个 JSON 格式的字符串
+                            const manufacturersJSON = JSON.stringify(presetManufacturers);
+
+                            // 创建新行
+                            const newRow = createRow([presetManufacturers.length, manufacturersJSON], false);
+
+                            // 将新行添加到表格中
+                            table.appendChild(newRow);
+
+                            floatingTable.appendChild(table);
+                            document.body.appendChild(floatingTable);
+                        }
+                    } else {
+                        console.log("多选按钮不存在");
+                    }
+                });
+            } else {
+                console.log("saveManufacturersForSearch已启用，但厂商未读取：",presetManufacturers);
+            }
+        }
         /*
         // 获取所有的表格
         const tables = document.querySelectorAll('table');
@@ -301,6 +335,7 @@
         let threshold = GM_getValue('threshold', 5);
         let disableNewUserCoupons = GM_getValue('disableNewUserCoupons', true);
         let deleteInvalidElements = GM_getValue('deleteInvalidElements', true);
+        let saveManufacturersForSearch = GM_getValue('saveManufacturersForSearch', true);
         let browseOnly = GM_getValue('browseOnly', false);
 
         // 创建菜单项
@@ -344,7 +379,7 @@
                 return; // 如果仍找不到.condition元素，直接跳过这个item并报错
             }
 
-            const condition = parseInt(conditionElement.textContent.trim().replace('满', '').replace('可用', ''));
+            const condition = conditionElement.textContent.trim().replace('满', '').replace('可用', '');
             const moneyElement = item.querySelector('.money');
             let money = condition; // 默认设置为condition，以防止空指针异常
             if (moneyElement) {
@@ -403,27 +438,28 @@
         const table = createTable();
 
         // 添加表头
-        const headerRow = createRow(['序号', '厂商'], true);
+        const headerRow = createRow(['总数', '可用优惠厂商'], true);
         table.appendChild(headerRow);
-        /*// 打印符合要求的厂商
-        validManufacturers.forEach((manufacturer, index) => {
-            const row = createRow([manufacturer]);
-            row.insertBefore(document.createElement('td'), row.firstChild).innerText = index + 1;
-            table.appendChild(row);
-        });*/
+        // 打印符合要求的厂商
 
-        // 将所有符合要求的厂商名拼接为一个长字符串,只用一行表格展示
-        const allManufacturers = validManufacturers.join(';');
+        // 将所有厂商名整理为一个 JSON 格式的字符串
+        const manufacturersJSON = JSON.stringify(validManufacturers);
 
         // 创建新行
-        const newRow = createRow([allManufacturers]);
-        newRow.insertBefore(document.createElement('td'), newRow.firstChild).innerText = validManufacturers.length;
+        const newRow = createRow([validManufacturers.length, manufacturersJSON], false);
 
         // 将新行添加到表格中
         table.appendChild(newRow);
 
         floatingTable.appendChild(table);
         document.body.appendChild(floatingTable);
+        if(saveManufacturersForSearch) {
+            GM_setValue('presetManufacturers', validManufacturers);
+            //console.log("厂商已保存：",validManufacturers);
+        } else {
+            GM_setValue('presetManufacturers', []);
+            //console.log("厂商未保存：",validManufacturers);
+        }
 
         // 禁用元素的函数
         function disableElement(item) {
@@ -466,6 +502,13 @@
                 updateCouponMenu();
             }));
 
+            couponMenuCommandIds.push(GM_registerMenuCommand(`是否生成优惠厂商列表供搜索页多选 (当前: ${saveManufacturersForSearch ? '启用' : '禁用'})`, () => {
+                saveManufacturersForSearch = !saveManufacturersForSearch;
+                GM_setValue('saveManufacturersForSearch', saveManufacturersForSearch);
+                alert(`${saveManufacturersForSearch ? '将' : '不再'}生成优惠厂商列表供搜索页面使用,请刷新页面使变更生效`);
+                updateCouponMenu();
+            }));
+
             couponMenuCommandIds.push(GM_registerMenuCommand(`仅浏览 (当前: ${browseOnly ? '启用' : '禁用'})`, () => {
                 browseOnly = !browseOnly;
                 GM_setValue('browseOnly', browseOnly);
@@ -486,6 +529,7 @@
         div.style.border = '1px solid black';
         div.style.padding = '10px';
         div.style.zIndex = '1000';
+        div.style.width = '450px';
         return div;
     }
 
