@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         立创助手
 // @namespace    http://tampermonkey.net/
-// @version      1.22
+// @version      1.23
 // @description  None
 // @author       Your Name
 // @match        https://cart.szlcsc.com/cart/display.html*
@@ -17,8 +17,7 @@
     'use strict';
 
     // 全局列表，用于存储菜单项的ID
-    let cartMenuCommandIds = [];
-    let couponMenuCommandIds = [];
+    let menuCommandIds = [];
 
     // 获取当前页面的 URL
     const currentUrl = window.location.href;
@@ -66,9 +65,12 @@
         console.log('处理搜索页面');
         // 预设的厂商列表
         var presetManufacturers = [];
-        var notfoundManufacturers = [];
 
         let saveManufacturersForSearch = GM_getValue('saveManufacturersForSearch', false);
+
+         // 创建菜单项
+        updateSearchMenu();
+
         if(saveManufacturersForSearch) {
             presetManufacturers = GM_getValue('presetManufacturers', presetManufacturers);
             if(presetManufacturers.length > 0) {
@@ -185,6 +187,14 @@
             }, randomWaitTime);
         }
         */
+        // 更新菜单项 - Search Menu
+        function updateSearchMenu() {
+            // 移除现有菜单项
+            menuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
+            menuCommandIds = [];
+
+            menuCommandIds.push(createMenuCommand('领券页收集的优惠厂商列表用于多选搜索', saveManufacturersForSearch, '使用领券页收集的优惠厂商列表进行多选搜索？', 'saveManufacturersForSearch', true));
+        }
     }
 
 
@@ -290,41 +300,16 @@
         floatingTable.appendChild(table);
         document.body.appendChild(floatingTable);
 
-        // 更新菜单项
+        // 更新菜单项 - Cart Menu
         function updateCartMenu() {
             // 移除现有菜单项
-            cartMenuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
-            cartMenuCommandIds = [];
+            menuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
+            menuCommandIds = [];
 
-            cartMenuCommandIds.push(GM_registerMenuCommand(`设置满多少 (当前: ${premiumBase})`, () => {
-                const newPremiumBase = prompt('请输入新的门槛:', premiumBase);
-                if (newPremiumBase !== null) {
-                    premiumBase = parseInt(newPremiumBase, 10);
-                    GM_setValue('premiumBase', premiumBase);
-                    alert(`门槛已设置为: ${premiumBase},请刷新页面使变更生效`);
-                    updateCartMenu();
-                }
-            }));
-
-            cartMenuCommandIds.push(GM_registerMenuCommand(`设置减多少 (当前: ${freeAmount})`, () => {
-                const newfreeAmount = prompt('请输入新的抵扣值:', freeAmount);
-                if (newfreeAmount !== null) {
-                    freeAmount = parseInt(newfreeAmount, 10);
-                    GM_setValue('freeAmount', freeAmount);
-                    alert(`抵扣值已设置为: ${freeAmount},请刷新页面使变更生效`);
-                    updateCartMenu();
-                }
-            }));
-
-            cartMenuCommandIds.push(GM_registerMenuCommand(`设置邮费 (当前: ${shippingFee})`, () => {
-                const newShippingFee = prompt('请输入新的邮费:', shippingFee);
-                if (newShippingFee !== null) {
-                    shippingFee = parseInt(newShippingFee, 10);
-                    GM_setValue('shippingFee', shippingFee);
-                    alert(`邮费已设置为: ${shippingFee},请刷新页面使变更生效`);
-                    updateCartMenu();
-                }
-            }));
+            // 添加 Cart Menu 的菜单项
+            menuCommandIds.push(createMenuCommand('设置满多少', premiumBase, '请输入新的门槛:', 'premiumBase'));
+            menuCommandIds.push(createMenuCommand('设置减多少', freeAmount, '请输入新的抵扣值:', 'freeAmount'));
+            menuCommandIds.push(createMenuCommand('设置邮费', shippingFee, '请输入新的邮费:', 'shippingFee'));
         }
     }
 
@@ -351,7 +336,7 @@
             style.type = 'text/css';
             style.innerHTML = `
                 .custom-button {
-                    background-color: #0094e7; /* 背景色 */
+                    background-color: #8e44ad; /* button背景色 原抢券按钮为0094e7 */
                     border: none; /* 无边框 */
                     color: white; /* 白色文字 */
                     padding: 4px 72px; /* 内边距 */
@@ -379,7 +364,7 @@
                 return; // 如果仍找不到.condition元素，直接跳过这个item并报错
             }
 
-            const condition = conditionElement.textContent.trim().replace('满', '').replace('可用', '');
+            const condition = parseInt(conditionElement.textContent.trim().replace('满', '').replace('可用', ''));
             const moneyElement = item.querySelector('.money');
             let money = condition; // 默认设置为condition，以防止空指针异常
             if (moneyElement) {
@@ -413,7 +398,7 @@
                 const couponBtn = item.querySelector('.coupon-item-btn');
                 if (couponBtn) {
                     const url = couponBtn.getAttribute('data-url');
-                    couponBtn.remove(); // 移除立即抢券部分
+                    couponBtn.remove(); // 移除原立即抢券按钮
 
                     const newBtn = document.createElement('button');
                     newBtn.innerText = '浏览';
@@ -427,7 +412,7 @@
 
         });
 
-          // 删除现有的浮动表格
+        // 删除现有的浮动表格
         const existingFloatingTable = document.getElementById('floatingTable');
         if (existingFloatingTable) {
             existingFloatingTable.remove();
@@ -472,50 +457,38 @@
             btn.style.color = 'gray';
         }
 
-        // 更新菜单项
+        // 更新菜单项 - Coupon Menu
         function updateCouponMenu() {
             // 移除现有菜单项
-            couponMenuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
-            couponMenuCommandIds = [];
+            menuCommandIds.forEach(id => GM_unregisterMenuCommand(id));
+            menuCommandIds = [];
 
-            couponMenuCommandIds.push(GM_registerMenuCommand(`设置阈值 (当前: ${threshold})`, () => {
-                const newThreshold = prompt('请输入新的阈值:', threshold);
-                if (newThreshold !== null) {
-                    threshold = parseInt(newThreshold, 10);
-                    GM_setValue('threshold', threshold);
-                    alert(`阈值已设置为: ${threshold},请刷新页面使变更生效`);
-                    updateCouponMenu();
-                }
-            }));
-
-            couponMenuCommandIds.push(GM_registerMenuCommand(`是否屏蔽新人专享券 (当前: ${disableNewUserCoupons ? '启用' : '禁用'})`, () => {
-                disableNewUserCoupons = !disableNewUserCoupons;
-                GM_setValue('disableNewUserCoupons', disableNewUserCoupons);
-                alert(`新人专享券将${disableNewUserCoupons ? '' : '不再'}被屏蔽,请刷新页面使变更生效`);
-                updateCouponMenu();
-            }));
-
-            couponMenuCommandIds.push(GM_registerMenuCommand(`是否移除不符合条件的元素 (当前: ${deleteInvalidElements ? '启用' : '禁用'})`, () => {
-                deleteInvalidElements = !deleteInvalidElements;
-                GM_setValue('deleteInvalidElements', deleteInvalidElements);
-                alert(`不符合条件的元素将${deleteInvalidElements ? '' : '不再'}被移除,请刷新页面使变更生效`);
-                updateCouponMenu();
-            }));
-
-            couponMenuCommandIds.push(GM_registerMenuCommand(`是否生成优惠厂商列表供搜索页多选 (当前: ${saveManufacturersForSearch ? '启用' : '禁用'})`, () => {
-                saveManufacturersForSearch = !saveManufacturersForSearch;
-                GM_setValue('saveManufacturersForSearch', saveManufacturersForSearch);
-                alert(`${saveManufacturersForSearch ? '将' : '不再'}生成优惠厂商列表供搜索页面使用,请刷新页面使变更生效`);
-                updateCouponMenu();
-            }));
-
-            couponMenuCommandIds.push(GM_registerMenuCommand(`仅浏览 (当前: ${browseOnly ? '启用' : '禁用'})`, () => {
-                browseOnly = !browseOnly;
-                GM_setValue('browseOnly', browseOnly);
-                alert(`仅浏览模式将${browseOnly ? '启用' : '禁用'},请刷新页面使变更生效`);
-                updateCouponMenu();
-            }));
+            menuCommandIds.push(createMenuCommand('设置阈值', threshold, '请输入新的阈值:', 'threshold'));
+            menuCommandIds.push(createMenuCommand('是否屏蔽新人专享券', disableNewUserCoupons, '新人专享券将被屏蔽？', 'disableNewUserCoupons', true));
+            menuCommandIds.push(createMenuCommand('是否移除不符合条件的元素', deleteInvalidElements, '不符合条件的元素将被移除？', 'deleteInvalidElements', true));
+            menuCommandIds.push(createMenuCommand('是否生成优惠厂商列表供搜索页多选', saveManufacturersForSearch, '生成优惠厂商列表供搜索页面多选？', 'saveManufacturersForSearch', true));
+            menuCommandIds.push(createMenuCommand('仅浏览', browseOnly, '启用仅浏览模式？', 'browseOnly', true));
         }
+    }
+
+    // 创建菜单项
+    function createMenuCommand(title, currentValue, promptMessage, valueKey, toggle = false) {
+        return GM_registerMenuCommand(`${title} (当前: ${currentValue})`, () => {
+            if (toggle) {
+                currentValue = !currentValue;
+            } else {
+                const newValue = prompt(promptMessage, currentValue);
+                if (newValue === null) {
+                    return;
+                }
+                currentValue = parseInt(newValue, 10);
+            }
+
+            GM_setValue(valueKey, currentValue);
+            const status = toggle ? (currentValue ? '启用' : '禁用') : currentValue;
+            alert(`${title} 已设置为: ${status},将刷新页面使变更生效`);
+            location.reload();
+        });
     }
 
     // 创建悬浮表格容器
