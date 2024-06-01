@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         立创助手
 // @namespace    http://tampermonkey.net/
-// @version      1.23
+// @version      1.24
 // @description  None
 // @author       Your Name
 // @match        https://cart.szlcsc.com/cart/display.html*
@@ -25,41 +25,54 @@
     // 根据不同的页面 URL 执行不同的处理逻辑
     if (currentUrl.includes('cart.szlcsc.com/cart/display.html')) {
         handleCartPage();
-        //observeDOMChanges(handleCartPage);
-        setInterval(handleCartPage, 3000); // 每隔3秒重新生成一次悬浮表格
+        observeTableChanges(handleCartPage);//购物车调整商品品类时触发回调
+        observeLineTotalPriceChanges(handleCartPage);//购物车调整购买数量时触发回调
     } else if (currentUrl.includes('www.szlcsc.com/huodong.html')) {
         handleCouponPage();
     } else if (currentUrl.includes('so.szlcsc.com/global.html')) {
         handleSearchPage();
     }
 
-/*     function debounce(func, wait) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
+    function observeLineTotalPriceChanges(callback) {
+        const targetNodes = document.querySelectorAll('.line-total-price');
+        const config = { characterData: true, subtree: true };
+
+        const observer = new MutationObserver((mutationsList, observer) => {
+            mutationsList.forEach(mutation => {
+                if (mutation.type === 'characterData') {
+                    callback();
+                    return;
+                }
+            });
+        });
+        targetNodes.forEach(node => observer.observe(node, config));
     }
-
-
-    function observeDOMChanges(callback) {
-        const targetNodes = document.querySelectorAll('.product-item');
+    function observeTableChanges(callback) {
+        const table = document.querySelector('.product-list');
         const config = { childList: true, subtree: true };
-
-        const debouncedCallback = debounce(callback, 500); // 500ms 防抖
 
         const observer = new MutationObserver((mutationsList, observer) => {
             for (const mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                // if (mutation.type === 'childList' && (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
-                    debouncedCallback();
-                    break;
+                if (mutation.type === 'childList' && (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
+                    for (const addedNode of mutation.addedNodes) {
+                        if (addedNode.classList && addedNode.classList.contains('product-item')) {
+                            callback();
+                            return;
+                        }
+                    }
+
+                    for (const removedNode of mutation.removedNodes) {
+                        if (removedNode.classList && removedNode.classList.contains('product-item')) {
+                            callback();
+                            return;
+                        }
+                    }
                 }
             }
         });
 
-        targetNodes.forEach(node => observer.observe(node, config));
-    } */
+        observer.observe(table, config);
+    }
 
     function handleSearchPage() {
         console.log('处理搜索页面');
@@ -276,10 +289,16 @@
 
             // 添加点击事件
             row.cells[1].innerHTML = `<a href="javascript:void(0)">${vendorText}</a>`;
-            row.cells[1].addEventListener('click', () => {
-                row.cells[1].innerText = `${vendorText} - 编号: ${vendorProductMap[vendor].join(', ')}`;
+            // 定义事件处理函数
+            const clickHandler = () => {
+                row.cells[1].innerHTML = `${vendorText} - 编号: ${vendorProductMap[vendor].join(', ')}`;
                 row.cells[1].style.cursor = 'default';
-            });
+                // 点击后即移除事件监听器以便选中复制文本
+                row.cells[1].removeEventListener('click', clickHandler);
+            };
+
+            // 添加事件监听器
+            row.cells[1].addEventListener('click', clickHandler);
 
             table.appendChild(row);
             index++;
